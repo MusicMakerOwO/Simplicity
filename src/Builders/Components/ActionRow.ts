@@ -1,4 +1,4 @@
-import ComponentTypes from "../Enums/ComponentTypes";
+import ComponentTypes from "../../Enums/ComponentTypes";
 
 export default class ActionRow<T extends { type: number, toJSON?: Function }> {
 	private type: ComponentTypes.ACTION_ROW;

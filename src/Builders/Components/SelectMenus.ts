@@ -1,5 +1,5 @@
 import SelectMenuOption from "./SelectMenuOption";
-import ComponentTypes from "../Enums/ComponentTypes";
+import ComponentTypes from "../../Enums/ComponentTypes";
 
 export default class SelectMenu {
 	private type: ComponentTypes.STRING_SELECT;
@@ -60,7 +60,7 @@ export default class SelectMenu {
 			type: this.type,
 			custom_id: this.custom_id,
 			placeholder: this.placeholder,
-			options: this.options.map((o: SelectMenuOption) => o.toJSON()),
+			options: this.options.map((o: SelectMenuOption) => typeof o.toJSON === 'function' ? o.toJSON() : o),
 			min_values: this.min_values,
 			max_values: this.max_values,
 			disabled: this.disabled

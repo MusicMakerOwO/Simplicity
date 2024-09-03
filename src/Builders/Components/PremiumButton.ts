@@ -1,5 +1,5 @@
-import ButtonStyles from '../Enums/ButtonStyles';
-import ComponentTypes from '../Enums/ComponentTypes';
+import ButtonStyles from '../../Enums/ButtonStyles';
+import ComponentTypes from '../../Enums/ComponentTypes';
 
 export default class PremiumButton {
 
