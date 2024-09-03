@@ -1,6 +1,4 @@
-// custom event emitter
-
-export default class Events {
+class Events {
 	private events: Map<string, Function[]>;
 
 	constructor() {
@@ -95,3 +93,5 @@ export default class Events {
 	}
 
 }
+export default Events;
+module.exports = Events;

@@ -1,12 +1,4 @@
-enum ButtonsStyles {
-	/*
-	1 - Default (Blue)
-	2 - Secondary (Gray)
-	3 - Success (Green)
-	4 - Danger (Red)
-	5 - Link (gray)
-	*/
-
+enum ButtonStyles {
 	DEFAULT = 1,
 	SECONDARY = 2,
 	SUCCESS = 3,
@@ -21,4 +13,4 @@ enum ButtonsStyles {
 	RED = 4
 }
 
-export default ButtonsStyles;
+export default ButtonStyles;

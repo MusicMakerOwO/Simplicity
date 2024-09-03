@@ -3,7 +3,7 @@
 import Events from './Events';
 import { WSEvents } from './Enums/Events';
 
-export default class WSClient extends Events {
+class WSClient extends Events {
 	private ws: WebSocket;
 
 	constructor(url: string, options: object) {
@@ -31,3 +31,5 @@ export default class WSClient extends Events {
 		return new WSClient(url.replace('ws:', 'wss:'), options);
 	}
 }
+
+module.exports = WSClient;
