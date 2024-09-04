@@ -2,10 +2,10 @@ import BaseCommand from './BaseCommand';
 
 export default class SlashCommand extends BaseCommand {
 
-	private default_permission: number;
-	private dm_permission: boolean;
-	private description_localizations: { [key: string]: string };
-	private nsfw: boolean;
+	public default_permission: number;
+	public dm_permission: boolean;
+	public description_localizations: { [key: string]: string };
+	public nsfw: boolean;
 
 	constructor() {
 		super();

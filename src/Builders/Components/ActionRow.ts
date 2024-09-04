@@ -1,8 +1,9 @@
 import ComponentTypes from "../../Enums/ComponentTypes";
 import Button from "./Button";
 import SelectMenu from "./SelectMenu";
+import ModalQuestion from "./ModalQuestion";
 
-export default class ActionRow<T extends Button | SelectMenu> {
+export default class ActionRow<T extends Button | SelectMenu | ModalQuestion> {
 
 	public type: ComponentTypes.ACTION_ROW;
 	public components: Array<T>;

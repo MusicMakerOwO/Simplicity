@@ -1,5 +1,5 @@
 export default class Events {
-	private events: Map<string, Function[]>;
+	public events: Map<string, Function[]>;
 
 	constructor() {
 		this.events = new Map<string, Function[]>();

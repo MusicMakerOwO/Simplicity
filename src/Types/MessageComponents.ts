@@ -71,7 +71,7 @@ export declare type ModalQuestion = {
 	type: 4;
 	label: string;
 	custom_id: string;
-	placeholder: string;
+	placeholder?: string;
 	min_length?: number;
 	max_length?: number;
 	required?: boolean;
@@ -85,7 +85,7 @@ export declare type Modal = {
 	components: Array<ActionRow<ModalQuestion>>;
 }
 
-export declare type ActionRow<T = Button | SelectMenu | ModalQuestion> = {
+export declare type ActionRow<T extends Button | SelectMenu | ModalQuestion> = {
 	type: 1;
 	components: Array<T>;
 }

@@ -21,8 +21,6 @@ export default class Button {
 		this.style = 2;
 		this.custom_id = Math.random().toString(36).substring(2); // random string if no custom id is provided
 		this.disabled = false;
-		this.url = null;
-		this.emoji = null;
 	}
 
 	setSKU() {
@@ -37,7 +35,8 @@ export default class Button {
 
 	setStyle(style: number) {
 		if (!(style in ButtonStyles)) throw new Error('Invalid button style - Must be between 1 and 6, try using the ButtonStyles enum');
-		this.style = style;
+		if (style < 1 || style > 6) throw new Error('Invalid button style - Must be between 1 and 6');
+		this.style = style as 1 | 2 | 3 | 4 | 5 | 6;
 		return this;
 	}
 
@@ -70,7 +69,7 @@ export default class Button {
 				animated: Boolean(parsedEmoji[1])
 			};
 		} else if (emoji === null) {
-			this.emoji = null;
+			this.emoji = undefined;
 		} else {
 			this.emoji = emoji;
 		}

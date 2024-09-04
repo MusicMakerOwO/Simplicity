@@ -3,7 +3,7 @@ import SubCommand from "./SubCommand";
 
 export default class SubCommandGroup extends BaseCommand {
 
-	private subcommands: Array<SubCommand>;
+	public subcommands: Array<SubCommand>;
 
 	constructor() {
 		super();
