@@ -53,3 +53,4 @@ export default class BaseCommand {
 		};
 	}
 }
+module.exports = exports.default;

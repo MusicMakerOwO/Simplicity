@@ -21,8 +21,8 @@ export default class ClientCache<T> {
 	}
 
 	async get(key: string, options: { cache?: boolean } = {}): Promise<T | undefined> {
-		if (options.cache) return this.#WrapInClass(this.cache.get(key));
-		if (!options.cache) return this.#WrapInClass(await this.fetch(key));
+		if (options.cache === true) return this.#WrapInClass(this.cache.get(key));
+		if (options.cache === false) return this.#WrapInClass(await this.fetch(key));
 
 		if (this.cache.has(key)) return this.#WrapInClass(this.cache.get(key));
 		
@@ -76,3 +76,4 @@ export default class ClientCache<T> {
 
 
 }
+module.exports = exports.default;

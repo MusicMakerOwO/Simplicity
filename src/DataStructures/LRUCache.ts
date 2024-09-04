@@ -29,3 +29,4 @@ export default class LRUCache<T, V> extends Map<T, V> {
 		return Array.from(this.values());
 	}
 }
+module.exports = exports.default;

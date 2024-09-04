@@ -3,9 +3,9 @@ import ComponentTypes from '../../Enums/ComponentTypes';
 
 export default class PremiumButton {
 
-	private type: ComponentTypes.BUTTON;
-	private style: ButtonStyles.PREMIUM;
-	private sku_id: string;
+	public type: ComponentTypes.BUTTON;
+	public style: ButtonStyles.PREMIUM;
+	public sku_id: string;
 
 	/*
 	Premium buttons must contain a sku_id, and cannot have a custom_id, label, url, or emoji.
@@ -31,3 +31,4 @@ export default class PremiumButton {
 		};
 	}
 }
+module.exports = exports.default;

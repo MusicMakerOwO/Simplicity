@@ -7,17 +7,16 @@ default?	boolean	Will show this option as selected by default
 */
 
 export default class SelectMenuOption {
-	private label: string;
-	private value: string;
-	private description: string | null;
-	private emoji: { id: string, name: string, animated: boolean } | null;
-	private default: boolean;
+
+	public label: string;
+	public value: string;
+	public description?: string;
+	public emoji?: { id: string, name: string, animated: boolean };
+	public default?: boolean;
 
 	constructor() {
 		this.label = '';
 		this.value = '';
-		this.description = null;
-		this.emoji = null;
 		this.default = false;
 	}
 
@@ -59,3 +58,4 @@ export default class SelectMenuOption {
 		};
 	}
 }
+module.exports = exports.default;

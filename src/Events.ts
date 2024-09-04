@@ -1,4 +1,4 @@
-class Events {
+export default class Events {
 	private events: Map<string, Function[]>;
 
 	constructor() {
@@ -93,5 +93,4 @@ class Events {
 	}
 
 }
-export default Events;
-module.exports = Events;
+module.exports = exports.default;

@@ -11,3 +11,4 @@ enum ComponentTypes {
 }
 
 export default ComponentTypes;
+module.exports = exports.default;

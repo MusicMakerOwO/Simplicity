@@ -14,3 +14,4 @@ enum ButtonStyles {
 }
 
 export default ButtonStyles;
+module.exports = exports.default;

@@ -7,13 +7,13 @@ export default class Button {
 		// TODO
 	}
 
-	private type: ComponentTypes.BUTTON;
-	private label: string;
-	private style: number;
-	private custom_id: string;
-	private disabled: boolean;
-	private url: string | null;
-	private emoji: { id: string, name: string, animated: boolean } | null;
+	public type: ComponentTypes.BUTTON;
+	public label: string;
+	public style: 1 | 2 | 3 | 4 | 5 | 6;
+	public custom_id: string;
+	public disabled?: boolean;
+	public url?: string;
+	public emoji?: { id: string, name: string, animated: boolean };
 
 	constructor(button: unknown) {
 		this.type = ComponentTypes.BUTTON;
@@ -89,3 +89,4 @@ export default class Button {
 		};
 	}
 }
+module.exports = exports.default;

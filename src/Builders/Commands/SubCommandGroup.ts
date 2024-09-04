@@ -2,6 +2,7 @@ import BaseCommand from "./BaseCommand";
 import SubCommand from "./SubCommand";
 
 export default class SubCommandGroup extends BaseCommand {
+
 	private subcommands: Array<SubCommand>;
 
 	constructor() {
@@ -32,3 +33,4 @@ export default class SubCommandGroup extends BaseCommand {
 		};
 	}
 }
+module.exports = exports.default;

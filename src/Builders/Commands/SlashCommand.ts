@@ -1,6 +1,7 @@
 import BaseCommand from './BaseCommand';
 
 export default class SlashCommand extends BaseCommand {
+
 	private default_permission: number;
 	private dm_permission: boolean;
 	private description_localizations: { [key: string]: string };
@@ -45,3 +46,5 @@ export default class SlashCommand extends BaseCommand {
 		};
 	}
 }
+
+module.exports = exports.default;

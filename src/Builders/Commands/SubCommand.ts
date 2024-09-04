@@ -27,3 +27,4 @@ export default class SubCommand extends BaseCommand {
 		};
 	}
 }
+module.exports = exports.default;
