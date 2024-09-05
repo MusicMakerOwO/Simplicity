@@ -2,25 +2,25 @@ import LRUCache from './LRUCache';
 
 declare type ClassConstructor<T> = new (...args: any[]) => T;
 
-export default class ClientCache<T> {
+export default class ClientCache<TIn extends Object, TOut extends Object> {
 	public readonly maxSize: number;
-	public readonly exportClass: ClassConstructor<T>;
+	public readonly exportClass: ClassConstructor<TOut>;
 	public readonly endpoint: string;
-	public readonly cache: LRUCache<string, T>;
+	public readonly cache: LRUCache<string, TIn>;
 
-	constructor(maxSize: number, exportClass: ClassConstructor<T>, endpoint: string) {
+	constructor(maxSize: number, exportClass: ClassConstructor<TOut>, endpoint: string) {
 		this.maxSize = maxSize;
 		this.exportClass = exportClass;
 		this.endpoint = endpoint;
-		this.cache = new LRUCache<string, T>(maxSize);
+		this.cache = new LRUCache<string, TIn>(maxSize);
 	}
 
-	#WrapInClass(data: any): T | undefined {
+	#WrapInClass(data: any): TOut | undefined {
 		if (!data) return undefined;
 		return new this.exportClass(data);
 	}
 
-	async get(key: string, options: { cache?: boolean } = {}): Promise<T | undefined> {
+	async get(key: string, options: { cache?: boolean } = {}): Promise<TOut | undefined> {
 		if (options.cache === true) return this.#WrapInClass(this.cache.get(key));
 		if (options.cache === false) return this.#WrapInClass(await this.fetch(key));
 
@@ -33,11 +33,19 @@ export default class ClientCache<T> {
 		return this.#WrapInClass(data);
 	}
 
-	set(key: string, value: T): void {
+	getSync(key: string): TOut | undefined {
+		return this.#WrapInClass(this.cache.get(key));
+	}
+
+	set(key: string, value: TIn): void {
+		if ('unavailable' in value && value.unavailable === true) {
+			this.cache.delete(key);
+			return;
+		}
 		this.cache.set(key, value);
 	}
 
-	async fetch(key: string): Promise<T | undefined> {
+	async fetch(key: string): Promise<TIn | undefined> {
 		// TODO
 		return undefined;
 	}
@@ -50,7 +58,7 @@ export default class ClientCache<T> {
 		this.cache.delete(key);
 	}
 
-	toArray(): T[] {
+	toArray(): Array<TIn> {
 		return this.cache.toArray();
 	}
 
@@ -62,15 +70,15 @@ export default class ClientCache<T> {
 		return Array.from(this.cache.keys());
 	}
 
-	values(): Array<T> {
+	values(): Array<TIn> {
 		return this.toArray();
 	}
 
-	entries(): Array<[string, T]> {
+	entries(): Array<[string, TIn]> {
 		return Array.from(this.cache.entries());
 	}
 
-	[Symbol.iterator](): IterableIterator<T> {
+	[Symbol.iterator](): IterableIterator<TIn> {
 		return this.values()[Symbol.iterator]();
 	}
 

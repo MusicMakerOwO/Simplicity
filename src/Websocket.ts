@@ -6,29 +6,15 @@ export default class WSClient extends Events {
 
 	#WSCallback(event: string) : (data: (CloseEvent | MessageEvent | Event) & { data?: string }) => void {
 		return (data) => {
-			const isJSON = this.#isJSON(data.data);
-			if (isJSON) {
+			try {
 				const parsed = JSON.parse(data.data);
 				this.emit(event, parsed);
-				return;
-			} else if (data.data) {
+			} catch {
 				this.emit(event, data.data);
-				return;
-			} else {
-				this.emit(event);
 			}
 		};
 	}
-
-	#isJSON(data: string) : boolean {
-		try {
-			JSON.parse(data);
-			return true;
-		} catch {
-			return false;
-		}
-	}
-
+	
 	constructor(url: string) {
 		super();
 		this.ws = new WebSocket(url);

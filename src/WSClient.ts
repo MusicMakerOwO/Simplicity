@@ -3,35 +3,33 @@ import { OPCodes } from "./APITypes/Enums";
 import Websocket from "./Websocket";
 import Client from "./Client";
 import EventDispatcher from "./EventDispatcher";
-
+import HTTPS from 'node:https';
 
 export default class WSClient {
 
-	#token: string | null;
+	#token: string | null = null;
 	#client: Client;
 	public ws: Websocket | null;
 	public seq: number | null;
 	public heartbeat_interval: number;
-	public connected_at: Date | null;
 	public jitter = Math.random() * 0.5 + 0.5;
-	public eventDispatcher: EventDispatcher;
+	public internalEvents: EventDispatcher;
+	public heartbeatInterval: NodeJS.Timeout | null = null;
 
-	constructor(client: Client, token = null, options = {}) {
-		this.#token = token;
+	constructor(client: Client) {
 		this.#client = client;
 		this.ws = null;
 		this.seq = null;
 		this.heartbeat_interval = 0;
-		this.connected_at = null;
-		this.eventDispatcher = new EventDispatcher(client);
+		this.internalEvents = new EventDispatcher(client);
 	}
-
-	// #GenerateHeaders() {
-	// 	return {
-	// 		Authorization: `Bot ${this.#token}`,
-	// 		'User-Agent': `DiscordBot (${this.#client.id}, 1.0) Node.js/${process.version}`
-	// 	};
-	// }
+	
+	#GenerateHeaders() {
+		return {
+			Authorization: `Bot ${this.#token}`,
+			'User-Agent': `DiscordBot (${this.#client.id}, 1.0) Node.js/${process.version}`
+		};
+	}
 
 	sendHeartbeat() {
 		this.ws?.send({
@@ -49,6 +47,7 @@ export default class WSClient {
 		const CloseWS = (error?: string) => {
 			if (error) console.error(error);
 			this.ws?.close();
+			if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
 		}
 
 		this.ws.on('open', () => this.#client.emit('events', 'Connected to Discord Gateway'));
@@ -77,8 +76,8 @@ export default class WSClient {
 				})
 				this.heartbeat_interval = data.d.heartbeat_interval;
 				this.sendHeartbeat();
-				setInterval(this.sendHeartbeat, this.heartbeat_interval * this.jitter);
-				this.connected_at = new Date();
+				this.heartbeatInterval = setInterval(this.sendHeartbeat, this.heartbeat_interval * this.jitter);
+				this.#client.connected_at = new Date();
 			}
 
 			if (data.op === OPCodes.HEARTBEAT) {
@@ -87,8 +86,38 @@ export default class WSClient {
 			}
 
 			if (data.op === OPCodes.DISPATCH) {
-				this.eventDispatcher.dispatch(data.t, data.d);
+				this.internalEvents.dispatch(data.t, data.d);
 			}
+		});
+	}
+
+	close() {
+		this.#client.connected_at = null;
+		this.ws?.close();
+	}
+
+	static METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+	SendRequest(method: string, resolvedEndpoint: string, options?: { body?: string, headers?: { [key: string]: any } }) : Promise<any> {
+		if (!WSClient.METHODS.includes(method)) throw new Error(`Invalid method '${method}' - Must be one of ${WSClient.METHODS.join(', ')}`);
+		const { body, headers: additionalHeaders = {} } = options ?? {};
+		const BASE_HEADERS = this.#GenerateHeaders();
+		return new Promise((resolve, reject) => {
+			const req = HTTPS.request(resolvedEndpoint, {
+				method: method,
+				headers: {
+					...BASE_HEADERS,
+					...additionalHeaders
+				},
+			})
+			req.on('error', reject);
+			req.on('response', (res) => {
+				const data: Array<string> = [];
+				res.on('data', data.push.bind(data));
+				res.on('end', () => resolve(data));
+			});
+			if (body) req.write(body);
+			req.end();
 		});
 	}
 }

@@ -11,17 +11,14 @@ export default class LRUCache<T, V> extends Map<T, V> {
 		return super.set(key, value);
 	}
 
-	moveToHead(key: T) : void {
-		const value = this.get(key);
-		if (value) {
-			this.delete(key);
-			this.set(key, value);
-		}
+	moveToHead(key: T, value: V) {
+		super.delete(key);
+		super.set(key, value);
 	}
 
 	override get(key: T): V | undefined {
 		const value = super.get(key);
-		if (value) this.moveToHead(key);
+		if (value) this.moveToHead(key, value);
 		return value;
 	}
 

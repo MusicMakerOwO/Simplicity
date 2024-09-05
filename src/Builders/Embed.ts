@@ -16,7 +16,7 @@ fields?	array of embed field objects	fields information, max of 25
 
 export default class Embed {
 	public title?: string;
-	public type: string;
+	public type: 'rich';
 	public description?: string;
 	public url?: string;
 	public timestamp?: string;
@@ -28,6 +28,10 @@ export default class Embed {
 	public provider?: { name: string; url?: string };
 	public author?: { name: string; url?: string; icon_url?: string; proxy_icon_url?: string };
 	public fields?: Array<{ name: string; value: string; inline?: boolean }>;
+
+	static isValid(embed: any = null) {
+		// coming soon
+	}
 
 	constructor() {
 		this.type = 'rich';

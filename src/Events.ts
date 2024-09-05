@@ -92,5 +92,14 @@ export default class Events {
 		return -1;
 	}
 
+	removeAllListeners(event?: string) : void {
+		if (event) {
+			const normalizedEvent = this.NormalizeEventName(event);
+			this.events.delete(normalizedEvent);
+		} else {
+			this.clear();
+		}
+	}
+
 }
 module.exports = exports.default;

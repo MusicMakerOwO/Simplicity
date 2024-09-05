@@ -30,23 +30,13 @@
 //     ]
 //   }
 
+import { APIUser } from "./Objects";
+
 
 export declare type ReadyEvent = {
 	v: number;
 	user_settings: {};
-	user: {
-		verified: boolean;
-		username: string;
-		mfa_enabled: boolean;
-		id: string;
-		global_name: string | null;
-		flags: number;
-		email: string | null;
-		discriminator: string;
-		clan: string | null;
-		bot: boolean;
-		avatar: string;
-	};
+	user: APIUser;
 	session_type: string;
 	session_id: string;
 	resume_gateway_url: string;
