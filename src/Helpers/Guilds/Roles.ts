@@ -8,14 +8,30 @@ import Helper from '../Helper';
 
 export default class GuildRoleHelper extends Helper {
 	#client: Client;
-	constructor(client: Client, guildID: string) {
+	constructor(client: Client, guildID: string, roles: Array<APIRole>) {
 		super(guildID);
 		this.#client = client;
+
+		for (const role of roles) {
+			this.#map.set(role.id, this.#WrapInClass(role));
+		}
+	}
+
+	#WrapInClass(data: APIRole): Role | undefined {
+		if (!data) return undefined;
+		return new Role(this.#client, data);
+	}
+
+	#map = {
+		// essnetially super.super.set(id, role), can't reach a grandparent class
+		set: Map.prototype.set.bind(this),
+		get: Map.prototype.get.bind(this),
 	}
 
 	override set(id: string, role: APIRole): this {
 		// return super.set(id, role);
 		this.#client.roles.set(`${this.guildID}::${id}`, role);
+		this.#map.set(id, this.#WrapInClass(role));
 		return this;
 	}
 

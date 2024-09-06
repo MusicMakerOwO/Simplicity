@@ -1,14 +1,17 @@
+import Client from '../Client';
 import LRUCache from './LRUCache';
 
 declare type ClassConstructor<T> = new (...args: any[]) => T;
 
 export default class ClientCache<TIn extends Object, TOut extends Object> {
+	#client: Client;
 	public readonly maxSize: number;
 	public readonly exportClass: ClassConstructor<TOut>;
 	public readonly endpoint: string;
 	public readonly cache: LRUCache<string, TIn>;
 
-	constructor(maxSize: number, exportClass: ClassConstructor<TOut>, endpoint: string) {
+	constructor(client: Client, maxSize: number, exportClass: ClassConstructor<TOut>, endpoint: string) {
+		this.#client = client;
 		this.maxSize = maxSize;
 		this.exportClass = exportClass;
 		this.endpoint = endpoint;
@@ -17,7 +20,7 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 
 	#WrapInClass(data: any): TOut | undefined {
 		if (!data) return undefined;
-		return new this.exportClass(data);
+		return new this.exportClass(this.#client, data);
 	}
 
 	async get(key: string, options: { cache?: boolean } = {}): Promise<TOut | undefined> {

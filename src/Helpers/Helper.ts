@@ -1,14 +1,15 @@
-export default class HelperInterface {
+export default class HelperInterface extends Map<string, any> {
 	public readonly guildID: string;
 	constructor(guildID: string) {
+		super();
 		this.guildID = guildID;
 	}
 
-	set(id: string, data: any): this {
+	override set(id: string, data: any): this {
 		throw new Error('Method not implemented.');
 	}
 
-	async get(id: string): Promise<any> {
+	override get(id: string): Promise<any> {
 		throw new Error('Method not implemented.');
 	}
 

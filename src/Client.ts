@@ -2,9 +2,12 @@ import WSClient from "./WSClient";
 import Events from "./Events";
 import ResolveIntents from "./Utils/ResolveIntents";
 import ClientCache from "./DataStructures/ClientCache";
-import User, { Endpoints as UserEndpoints } from "./Objects/User";
-import Guild, { Endpoints as GuildEndpoints } from "./Objects/Guild";
-import Role, { Endpoints as RoleEndpoints } from "./Objects/Role";
+import User from "./Objects/User";
+import Guild from "./Objects/Guild";
+import Role from "./Objects/Role";
+import GuildEndpoints from "./APITypes/Endpoints/Guilds";
+import RoleEndpoints from "./APITypes/Endpoints/Roles";
+import UserEndpoints from "./APITypes/Endpoints/Users";
 import { APIUser, APIRole, APIGuild, APIChannel, APIEmoji, APISticker } from "./APITypes/Objects";
 
 function Range(min:number, value:number, max:number): number {
@@ -54,12 +57,12 @@ export default class Client extends Events {
 		this.ws = new WSClient(this);
 		this.id = this.#ExtractIDFromToken(this.#token);
 
-		this.guilds = new ClientCache(1000, Guild, GuildEndpoints.GET_GUILD);
-		this.channels = new ClientCache(1000, Object, '');
-		this.roles = new ClientCache(1000, Role, RoleEndpoints.GET_ROLE);
-		this.users = new ClientCache(1000, User, UserEndpoints.GET_USER);
-		this.emojis = new ClientCache(1000, Object, '');
-		this.stickers = new ClientCache(1000, Object, '');
+		this.guilds = new ClientCache(this, 1000, Guild, GuildEndpoints.GET_GUILD);
+		this.channels = new ClientCache(this, 1000, Object, '');
+		this.roles = new ClientCache(this, 1000, Role, RoleEndpoints.GET_ROLE);
+		this.users = new ClientCache(this, 1000, User, UserEndpoints.GET_USER);
+		this.emojis = new ClientCache(this, 1000, Object, '');
+		this.stickers = new ClientCache(this, 1000, Object, '');
 	}
 
 	#ExtractIDFromToken(token: string): string {

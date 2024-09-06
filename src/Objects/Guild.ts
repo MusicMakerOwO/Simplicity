@@ -47,7 +47,10 @@ safety_alerts_channel_id	?snowflake	the id of the channel where admins and moder
 import Endpoints from "../APITypes/Endpoints/Guilds";
 export { Endpoints };
 
-import { APIGuild, APIEmoji, APISticker, APIRole, APIWelcomeScreen } from "../APITypes/Objects";
+import { APIGuild, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
+import User from "./User";
+import GuildRoleHelper from "../Helpers/Guilds/Roles";
+import Client from "../Client";
 
 export default class Guild {
 	public readonly id: string;
@@ -55,7 +58,7 @@ export default class Guild {
 	public readonly icon: string | undefined;
 	public readonly splash: string | undefined;
 	public readonly discovery_splash: string | undefined;
-	public readonly owner: boolean;
+	public readonly owner: User | undefined;
 	public readonly owner_id: string;
 	public readonly permissions: string | undefined;
 	public readonly region: string | undefined;
@@ -66,7 +69,7 @@ export default class Guild {
 	public readonly verification_level: number;
 	public readonly default_message_notifications: number;
 	public readonly explicit_content_filter: number;
-	public readonly roles: Array<APIRole>;
+	public readonly roles: GuildRoleHelper;
 	public readonly emojis: Array<APIEmoji>;
 	public readonly features: Array<string>;
 	public readonly mfa_level: number;
@@ -93,13 +96,12 @@ export default class Guild {
 	public readonly premium_progress_bar_enabled: boolean;
 	public readonly safety_alerts_channel_id: string | undefined;
 	
-	constructor(data: APIGuild) {
+	constructor(client: Client, data: APIGuild) {
 		this.id = data.id;
 		this.name = data.name;
 		this.icon = data.icon;
 		this.splash = data.splash;
 		this.discovery_splash = data.discovery_splash;
-		this.owner = Boolean(data.owner);
 		this.owner_id = data.owner_id;
 		this.permissions = data.permissions;
 		this.region = data.region;
@@ -110,7 +112,6 @@ export default class Guild {
 		this.verification_level = data.verification_level;
 		this.default_message_notifications = data.default_message_notifications;
 		this.explicit_content_filter = data.explicit_content_filter;
-		this.roles = data.roles;
 		this.emojis = data.emojis;
 		this.features = data.features;
 		this.mfa_level = data.mfa_level;
@@ -136,6 +137,9 @@ export default class Guild {
 		this.stickers = data.stickers ?? [];
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
+
+		this.owner = client.users.getSync(this.owner_id);
+		this.roles = new GuildRoleHelper(client, this.id, data.roles);
 	}
 
 	get iconURL() {
