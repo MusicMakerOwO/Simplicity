@@ -43,16 +43,14 @@ stickers?	array of sticker objects	custom guild stickers
 premium_progress_bar_enabled	boolean	whether the guild has the boost progress bar enabled
 safety_alerts_channel_id	?snowflake	the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 */
-
-import Endpoints from "../APITypes/Endpoints/Guilds";
-export { Endpoints };
-
 import { APIGuild, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
 import User from "./User";
 import GuildRoleHelper from "../Helpers/Guilds/Roles";
 import Client from "../Client";
 
 export default class Guild {
+	#client: Client;
+
 	public readonly id: string;
 	public readonly name: string;
 	public readonly icon: string | undefined;
@@ -97,6 +95,9 @@ export default class Guild {
 	public readonly safety_alerts_channel_id: string | undefined;
 	
 	constructor(client: Client, data: APIGuild) {
+		this.#client = client;
+		this.#client;
+
 		this.id = data.id;
 		this.name = data.name;
 		this.icon = data.icon;

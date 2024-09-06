@@ -5,7 +5,7 @@ import User from '../Objects/User.js';
 export default {
 	name: 'READY',
 	execute: async function(client: Client, data: ReadyEvent) {
-		client.user = new User(data.user);
+		client.user = new User(client, data.user);
 
 		// Guilds are emmitted seperately in GUILD_CREATE
 		// https://discord.com/developers/docs/topics/gateway-events#ready

@@ -18,8 +18,7 @@ public_flags?	integer	the public flags on a user's account	identify
 avatar_decoration_data?	?avatar decoration data object	data for the user's avatar decoration	identify
 */
 
-import Endpoints from "../APITypes/Endpoints/Users";
-export { Endpoints };
+import Client from "../Client";
 
 import BitField from "../DataStructures/BitField";
 import UserFlags from "../Enums/UserFlags";
@@ -27,6 +26,8 @@ import NitroSubscriptions from "../Enums/NitroSubscriptions";
 import { APIUser } from "../APITypes/Objects";
 
 export default class User {
+	#client: Client;
+
 	public readonly id: string;
 	public readonly username: string;
 	public readonly discriminator: string;
@@ -48,7 +49,11 @@ export default class User {
 
 	#defaultAvatarID: number;
 
-	constructor(data: APIUser) {
+	constructor(client: Client, data: APIUser) {
+
+		this.#client = client;
+		this.#client;
+
 		this.id = data.id;
 		this.username = data.username;
 		this.discriminator = data.discriminator;
