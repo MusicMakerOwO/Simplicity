@@ -2,17 +2,20 @@ import WSClient from "./WSClient";
 import Events from "./Events";
 import ResolveIntents from "./Utils/ResolveIntents";
 import ClientCache from "./DataStructures/ClientCache";
-import User from "./Objects/User";
-import Guild from "./Objects/Guild";
-import Role from "./Objects/Role";
 import GuildEndpoints from "./APITypes/Endpoints/Guilds";
 import RoleEndpoints from "./APITypes/Endpoints/Roles";
 import UserEndpoints from "./APITypes/Endpoints/Users";
+import EmojiEndpoints from "./APITypes/Endpoints/Emojis";
+import StickerEndpoints from "./APITypes/Endpoints/Sticker";
 import { APIUser, APIRole, APIGuild, APIChannel, APIEmoji, APISticker } from "./APITypes/Objects";
 
-function Range(min:number, value:number, max:number): number {
-	return Math.max(min, Math.min(value, max));
-}
+import User from "./Objects/User";
+import Guild from "./Objects/Guild";
+import Role from "./Objects/Role";
+import Emoji from "./Objects/Emoji";
+import Sticker from "./Objects/Sticker";
+
+import Range from "./Utils/Range";
 
 const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_]{26}\.[A-Za-z0-9_]{6}\.[A-Za-z0-9_]{38})$/;
 
@@ -26,11 +29,11 @@ export default class Client extends Events {
 	public user: User | null = null;
 
 	public guilds: ClientCache<APIGuild, Guild>;
-	public channels: ClientCache<APIChannel, Object>;
+	public channels: ClientCache<APIChannel, Object>; // coming soon lol
 	public roles: ClientCache<APIRole, Role>;
 	public users: ClientCache<APIUser, User>;
-	public emojis: ClientCache<APIEmoji, Object>;
-	public stickers: ClientCache<APISticker, Object>;
+	public emojis: ClientCache<APIEmoji, Emoji>;
+	public stickers: ClientCache<APISticker, Sticker>;
 
 	constructor(options : { token: string, intents: number | string[], shards: number }) {
 		super();
@@ -61,8 +64,8 @@ export default class Client extends Events {
 		this.channels = new ClientCache(this, 1000, Object, '');
 		this.roles = new ClientCache(this, 1000, Role, RoleEndpoints.GET_ROLE);
 		this.users = new ClientCache(this, 1000, User, UserEndpoints.GET_USER);
-		this.emojis = new ClientCache(this, 1000, Object, '');
-		this.stickers = new ClientCache(this, 1000, Object, '');
+		this.emojis = new ClientCache(this, 1000, Emoji, EmojiEndpoints.GET_EMOJI);
+		this.stickers = new ClientCache(this, 1000, Sticker, StickerEndpoints.GET_STICKER);
 	}
 
 	#ExtractIDFromToken(token: string): string {
