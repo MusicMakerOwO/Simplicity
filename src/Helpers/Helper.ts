@@ -5,6 +5,11 @@ export default class HelperInterface extends Map<string, any> {
 		this.guildID = guildID;
 	}
 
+	public readonly cache: { set: (id: string, data: unknown) => void, get: (id: string) => unknown } = {
+		set: super.set,
+		get: super.get,
+	}
+	
 	override set(id: string, data: any): this {
 		throw new Error('Method not implemented.');
 	}

@@ -74,14 +74,26 @@ export declare type APIEmoji = {
 	available?: boolean;
 };
 
+export enum APIStickerTypes {
+	Standard = 1,
+	Guild = 2
+}
+
+export enum APIStickerFormat {
+	PNG = 1,
+	APNG = 2,
+	Lottie = 3,
+	GIF = 4
+}
+
 export declare type APISticker = {
 	id: string;
 	pack_id?: string;
 	name: string;
-	description?: string;
+	description: string;
 	tags: string;
-	type: number;
-	format_type: number;
+	type: APIStickerTypes;
+	format_type: APIStickerFormat;
 	available?: boolean;
 	guild_id?: string;
 	user?: APIUser;
