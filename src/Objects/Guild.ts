@@ -158,5 +158,25 @@ export default class Guild {
 	get bannerURL() {
 		return this.banner ? `https://cdn.discordapp.com/banners/${this.id}/${this.banner}.webp` : null;
 	}
+
+	get vanityURL() {
+		return this.vanity_url_code ? `https://discord.gg/${this.vanity_url_code}` : null;
+	}
+
+	get systemChannel() {
+		return this.system_channel_id ? this.#client.channels.getSync(this.system_channel_id) : null;
+	}
+
+	get rulesChannel() {
+		return this.rules_channel_id ? this.#client.channels.getSync(this.rules_channel_id) : null;
+	}
+
+	get publicUpdatesChannel() {
+		return this.public_updates_channel_id ? this.#client.channels.getSync(this.public_updates_channel_id) : null;
+	}
+
+	get safetyAlertsChannel() {
+		return this.safety_alerts_channel_id ? this.#client.channels.getSync(this.safety_alerts_channel_id) : null;
+	}
 }
 module.exports = exports.default;

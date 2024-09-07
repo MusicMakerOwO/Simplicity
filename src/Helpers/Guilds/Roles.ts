@@ -29,7 +29,6 @@ export default class GuildRoleHelper extends Helper {
 	}
 
 	override set(id: string, role: APIRole): this {
-		// return super.set(id, role);
 		this.#client.roles.set(`${this.guildID}::${id}`, role);
 		this.#map.set(id, this.#WrapInClass(role));
 		return this;
