@@ -41,3 +41,4 @@ export default class Emoji {
 		});
 	}
 }
+module.exports = exports.default;

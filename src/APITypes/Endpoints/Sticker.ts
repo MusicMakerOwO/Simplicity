@@ -6,3 +6,4 @@ const Endpoints: Record<string, string> = {
 	DELETE_STICKER: '/guilds/{guild_id}/stickers/{sticker_id}'
 }
 export default Endpoints;
+module.exports = exports.default;

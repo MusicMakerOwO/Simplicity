@@ -49,3 +49,4 @@ export default class GuildEmojiHelper extends Helper {
 		return emoji;
 	}
 }
+module.exports = exports.default;

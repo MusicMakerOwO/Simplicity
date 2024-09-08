@@ -50,3 +50,5 @@ export default class GuildStickerHelper extends Helper {
 	}
 }
 
+
+module.exports = exports.default;

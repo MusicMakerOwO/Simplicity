@@ -2,14 +2,18 @@ import WSClient from "./WSClient";
 import Events from "./Events";
 import ResolveIntents from "./Utils/ResolveIntents";
 import ClientCache from "./DataStructures/ClientCache";
+
 import GuildEndpoints from "./APITypes/Endpoints/Guilds";
+import ChannelEndpoints from "./APITypes/Endpoints/Channels";
 import RoleEndpoints from "./APITypes/Endpoints/Roles";
 import UserEndpoints from "./APITypes/Endpoints/Users";
 import EmojiEndpoints from "./APITypes/Endpoints/Emojis";
 import StickerEndpoints from "./APITypes/Endpoints/Sticker";
-import { APIUser, APIRole, APIGuild, APIChannel, APIEmoji, APISticker } from "./APITypes/Objects";
+
+import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker } from "./APITypes/Objects";
 
 import User from "./Objects/User";
+import Channel from "./Objects/Channel";
 import Guild from "./Objects/Guild";
 import Role from "./Objects/Role";
 import Emoji from "./Objects/Emoji";
@@ -61,7 +65,7 @@ export default class Client extends Events {
 		this.id = this.#ExtractIDFromToken(this.#token);
 
 		this.guilds = new ClientCache(this, 1000, Guild, GuildEndpoints.GET_GUILD);
-		this.channels = new ClientCache(this, 1000, Object, '');
+		this.channels = new ClientCache(this, 1000, Channel, ChannelEndpoints.GET_CHANNEL);
 		this.roles = new ClientCache(this, 1000, Role, RoleEndpoints.GET_ROLE);
 		this.users = new ClientCache(this, 1000, User, UserEndpoints.GET_USER);
 		this.emojis = new ClientCache(this, 1000, Emoji, EmojiEndpoints.GET_EMOJI);

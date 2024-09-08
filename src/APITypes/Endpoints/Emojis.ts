@@ -12,3 +12,4 @@ const Endpoints: Record<string, string> = {
 	DELETE_BOT_EMOJI: '/applications/{application_id}/emojis/{emoji_id}',
 }
 export default Endpoints;
+module.exports = exports.default;

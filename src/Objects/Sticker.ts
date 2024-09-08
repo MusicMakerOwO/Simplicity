@@ -45,3 +45,4 @@ export default class Sticker {
 		return `https://cdn.discordapp.com/stickers/${this.id}.png?size=${size}`;
 	}
 }
+module.exports = exports.default;
