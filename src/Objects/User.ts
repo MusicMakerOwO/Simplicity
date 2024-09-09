@@ -23,7 +23,9 @@ import Client from "../Client";
 import BitField from "../DataStructures/BitField";
 import UserFlags from "../Enums/UserFlags";
 import NitroSubscriptions from "../Enums/NitroSubscriptions";
-import { APIUser } from "../APITypes/Objects";
+import { APIUser, APIAvatarDecoration } from "../APITypes/Objects";
+
+import SnowflakeToDate from "../Utils/SnowflakeToDate";
 
 export default class User {
 	#client: Client;
@@ -44,8 +46,8 @@ export default class User {
 	public readonly flags: BitField;
 	public readonly nitro_subscription: string;
 	public readonly public_flags: BitField;
-	public avatar_decoration_data: any;
-	public created_at: Date;
+	public readonly avatar_decoration_data: APIAvatarDecoration | null;
+	public readonly created_at: Date;
 
 	#defaultAvatarID: number;
 
@@ -70,9 +72,9 @@ export default class User {
 		this.flags = new BitField(data.flags ?? 0, UserFlags);
 		this.nitro_subscription = NitroSubscriptions[data.premium_type ?? 0];
 		this.public_flags = new BitField(data.public_flags ?? 0, UserFlags);
-		this.avatar_decoration_data = data.avatar_decoration_data;
+		this.avatar_decoration_data = data.avatar_decoration_data ?? null;
 
-		this.created_at = new Date(Number(BigInt(this.id) >> 22n) + 1420070400000);
+		this.created_at = SnowflakeToDate(this.id);
 
 		this.#defaultAvatarID = this.discriminator === '0' ? Number(BigInt(this.id) >> 22n) % 6 : Number(this.discriminator) % 5;
 	}

@@ -547,7 +547,7 @@ export declare type APIActionRow = {
 	components: Array<APIButton | APISelectMenu | APIModalQuestion>;
 };
 
-export enum APIInteractionTypes {
+export enum APIInteractionContext {
 	GUILD = 0,
 	BOT_DM = 1,
 	PRIVATE_CHANNEL = 2
@@ -572,7 +572,7 @@ export declare type APIInteraction = {
 	guild_locale: string;
 	entitlements: Array<APIInteractionEntitlement>;
 	authorizing_integration_owners: Record<string, string>;
-	context: APIInteractionTypes;
+	context: APIInteractionContext;
 };
 
 export declare type APIInteractionData = {

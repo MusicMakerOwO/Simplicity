@@ -44,9 +44,9 @@ premium_progress_bar_enabled	boolean	whether the guild has the boost progress ba
 safety_alerts_channel_id	?snowflake	the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 */
 import { APIGuild, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
-import User from "./User";
 import GuildRoleHelper from "../Helpers/Guilds/Roles";
 import Client from "../Client";
+import SnowflakeToDate from "../Utils/SnowflakeToDate";
 
 export default class Guild {
 	#client: Client;
@@ -56,7 +56,6 @@ export default class Guild {
 	public readonly icon: string | undefined;
 	public readonly splash: string | undefined;
 	public readonly discovery_splash: string | undefined;
-	public readonly owner: User | undefined;
 	public readonly owner_id: string;
 	public readonly permissions: string | undefined;
 	public readonly region: string | undefined;
@@ -93,6 +92,8 @@ export default class Guild {
 	public readonly stickers: Array<APISticker>;
 	public readonly premium_progress_bar_enabled: boolean;
 	public readonly safety_alerts_channel_id: string | undefined;
+
+	public readonly created_at: Date;
 	
 	constructor(client: Client, data: APIGuild) {
 		this.#client = client;
@@ -139,8 +140,8 @@ export default class Guild {
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
 
-		this.owner = client.users.getSync(this.owner_id);
 		this.roles = new GuildRoleHelper(client, this.id, data.roles);
+		this.created_at = SnowflakeToDate(this.id);
 	}
 
 	get iconURL() {
