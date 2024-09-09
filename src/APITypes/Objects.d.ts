@@ -546,3 +546,71 @@ export declare type APIActionRow = {
 	type: 1;
 	components: Array<APIButton | APISelectMenu | APIModalQuestion>;
 };
+
+export enum APIInteractionTypes {
+	GUILD = 0,
+	BOT_DM = 1,
+	PRIVATE_CHANNEL = 2
+}
+
+export declare type APIInteraction = {
+	id: string;
+	application_id: string;
+	type: number;
+	data: APIInteractionData;
+	guild?: APIGuild;
+	guild_id: string;
+	channel?: APIChannel;
+	channel_id: string;
+	member?: APIMember;
+	user?: APIUser;
+	token: string;
+	version: number;
+	message?: APIMessage;
+	app_permissions: string;
+	locale?: string;
+	guild_locale: string;
+	entitlements: Array<APIInteractionEntitlement>;
+	authorizing_integration_owners: Record<string, string>;
+	context: APIInteractionTypes;
+};
+
+export declare type APIInteractionData = {
+	id: string;
+	name: string;
+	type: number;
+	resolved: APIResolvedData;
+	options: Array<APIInteractionOption>;
+	guild_id: string;
+	target_id: string;
+};
+
+export declare type APIResolvedData = {
+	users: Record<string, APIUser>;
+	members: Record<string, APIMember>;
+	roles: Record<string, APIRole>;
+	channels: Record<string, APIChannel>;
+	messages: Record<string, APIMessage>;
+	attachments: Record<string, APIAttachment>;
+};
+
+export declare type APIInteractionOption = {
+	name: string;
+	type: number;
+	value?: string | number | boolean;
+	options?: Array<APIInteractionOption>;
+	focused?: boolean;
+};
+
+export declare type APIInteractionEntitlement = {
+	id: string;
+	sku_id: string;
+	application_id: string;
+	user_id?: string;
+	type: number;
+	deleted: boolean;
+	starts_at?: string;
+	ends_at?: string;
+	guild_id?: string;
+	consumed?: boolean;
+};
