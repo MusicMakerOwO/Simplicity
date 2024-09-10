@@ -26,7 +26,7 @@ import Range from "./Utils/Range";
 import ResolveEndpoint from "./Utils/ResolveEndpoint";
 import CommandEndpoints from "./APITypes/Endpoints/Commands";
 
-const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_]{26}\.[A-Za-z0-9_]{6}\.[A-Za-z0-9_]{38})$/;
+const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_-]{26}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{38})$/;
 
 export default class Client extends Events {
 	#token: string;
