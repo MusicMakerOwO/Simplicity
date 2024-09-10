@@ -31,3 +31,4 @@ export default class Member extends User {
 		this.guild = guild;
 	}
 }
+module.exports = exports.default;

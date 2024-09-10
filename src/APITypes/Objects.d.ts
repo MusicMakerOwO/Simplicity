@@ -455,6 +455,7 @@ export declare type APIMessageSnapshot = {
 
 export declare type APIMessage = {
 	id: string;
+	guild_id: string;
 	channel_id: string;
 	author: APIUser;
 	content: string;

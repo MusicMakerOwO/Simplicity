@@ -1,5 +1,5 @@
-// /guilds/{guild_id}/bans/{user_id} -> https://discord.com/api/v11/guilds/123/bans/456
-const BASE_ENDPOINT = 'https://discord.com/api/v11';
+// /guilds/{guild_id}/bans/{user_id} -> https://discord.com/api/v10/guilds/123/bans/456
+const BASE_ENDPOINT = 'https://discord.com/api/v10';
 const INSERTS_REGEX = /{([^}]+)}/g;
 export default function ResolveEndpoint(endpoint: string, objects: { [key: string]: Object }) {
 	const inserts = endpoint.match(INSERTS_REGEX);

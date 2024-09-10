@@ -9,8 +9,11 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 	public readonly exportClass: ClassConstructor<TOut>;
 	public readonly endpoint: string;
 	public readonly cache: LRUCache<string, TIn>;
+	#name: string;
+	public fullWarning: boolean = false;
 
 	constructor(client: Client, maxSize: number, exportClass: ClassConstructor<TOut>, endpoint: string) {
+		this.#name = exportClass.name;
 		this.#client = client;
 		this.maxSize = maxSize;
 		this.exportClass = exportClass;
@@ -40,12 +43,20 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 		return this.#WrapInClass(this.cache.get(key));
 	}
 
+	WarnFullCache() {
+		if (this.fullWarning) return;
+		console.warn(`Cache for '${this.#name}s' is full, consider increasing the cache size. (${this.cache.size}/${this.maxSize})`);
+		console.warn(`Endpoint: ${this.endpoint}`);
+		this.fullWarning = true;
+	}
+
 	set(key: string, value: TIn): void {
 		if ('unavailable' in value && value.unavailable === true) {
 			this.cache.delete(key);
 			return;
 		}
 		this.cache.set(key, value);
+		if (this.cache.size >= this.maxSize) this.WarnFullCache();
 	}
 
 	async fetch(key: string): Promise<TIn | undefined> {
@@ -85,6 +96,8 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 		return this.values()[Symbol.iterator]();
 	}
 
-
+	isFull(): boolean {
+		return this.cache.size >= this.maxSize;
+	}
 }
 module.exports = exports.default;

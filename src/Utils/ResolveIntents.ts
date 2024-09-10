@@ -7,18 +7,19 @@ export default function ResolveIntents(intents: number | bigint | string[]): big
 
 	// MESSAGE_CREATE -> messageCreate
 	function NormalizeEventName(event: string) : string {
-		return String(event).toLowerCase().replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+		if (!/^[A-Z_]+$/.test(event)) return event;
+		return String(event).toLowerCase().replace(/_([a-z])/g, (_, x) => x.toUpperCase());
 	}
 
-	let result = BigInt(0);
+	let result = 0n;
 	for (const intent of intents) {
 		const intentName = NormalizeEventName(intent);
-		const intentValue = Intents[intentName];
-		if (!intentValue) {
+		if (intentName in Intents) {
+			result |= Intents[intentName];
+		} else {
 			const closestMatch = ClosestMatch(intentName, Object.keys(Intents));
 			throw new Error(`Invalid intent "${intent}", did you mean "${closestMatch}"?`);
 		}
-		result |= BigInt(intentValue);
 	}
 
 	// I really don't know why you would leave this out

@@ -100,3 +100,4 @@ export default class Interaction {
 	}
 
 }
+module.exports = exports.default;

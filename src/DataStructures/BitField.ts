@@ -2,31 +2,31 @@ export default class BitField {
 	public bits: bigint;
 	public flags: Record<string, bigint>;
 
-	public ALL: boolean;
-	public NONE: boolean;
+	public _ALL: boolean;
+	public _NONE: boolean;
 
 	constructor(bits: number | bigint, flags: Record<string, bigint>) { // record = object
 		this.bits = BigInt(bits);
 		this.flags = flags;
 
-		for (const flag of Object.keys(flags)) {
-			Object.defineProperty(this, flag, {
-				get: this.has.bind(this, flag),
-				set: this.set.bind(this, flag)
-			});
-		}
-
 		// these are here only to please the TS compiler lol
-		this.ALL = false;
-		this.NONE = false;
+		this._ALL = false;
+		this._NONE = false;
 		
 		// initalize values
-		this.updateMeta();
+		this.update();
 	}
 
-	updateMeta() {
-		this.NONE = this.bits === BigInt(0);
-		this.ALL = !this.NONE;
+	update() {
+		for (const flag in this.flags) {
+			Object.defineProperty(this, flag, {
+				value: this.has(flag),
+				enumerable: true,
+				configurable: true
+			});
+		}
+		this._NONE = this.bits === BigInt(0);
+		this._ALL = !this._NONE;
 	}
 
 	has(flag: string) {
@@ -39,7 +39,7 @@ export default class BitField {
 		} else {
 			this.bits &= ~this.flags[flag];
 		}
-		this.updateMeta();
+		this.update();
 	}
 
 	serialize() {

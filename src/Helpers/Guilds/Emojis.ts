@@ -34,7 +34,7 @@ export default class GuildEmojiHelper extends Helper {
 
 	override async getAll(): Promise<Emoji[]> {
 		const endpoint = ResolveEndpoint(Endpoints.GET_EMOJIS, { guild: { id: this.guildID } });
-		const data = await this.#client.ws?.SendRequest('GET', endpoint) as APIEmoji[];
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APIEmoji[];
 		data.forEach(emoji => this.set(emoji.id, emoji));
 		const emojis = data.map(emoji => new Emoji(emoji));
 		return emojis;
@@ -43,7 +43,7 @@ export default class GuildEmojiHelper extends Helper {
 	override async fetch(id: string): Promise<Emoji | undefined> {
 		if (!id) throw new Error('Emoji ID is required - If trying to fetch everything, use getAll()');
 		const endpoint = ResolveEndpoint(Endpoints.GET_EMOJI, { guild: { id: this.guildID }, emoji: { id } });
-		const data = await this.#client.ws?.SendRequest('GET', endpoint) as APIEmoji;
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APIEmoji;
 		const emoji = this.#WrapInClass(data);
 		this.set(data.id, data);
 		return emoji;

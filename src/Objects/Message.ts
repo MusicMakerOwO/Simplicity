@@ -19,8 +19,6 @@ import {
 
 import User from './User';
 import Channel from './Channel';
-import Guild from './Guild';
-import Member from './Member';
 
 /*
 export declare type APIMessage = {
@@ -64,7 +62,10 @@ export declare type APIMessage = {
 */
 
 export default class Message {
+	#client: Client;
+
 	public readonly id: string;
+	public readonly guild_id: string | null;
 	public readonly channel_id: string;
 	public readonly author: User;
 	public readonly content: string;
@@ -101,7 +102,10 @@ export default class Message {
 	public readonly call: APIMessageCall | null;
 
 	constructor(client: Client, data: APIMessage) {
+		this.#client = client;
+
 		this.id = data.id;
+		this.guild_id = data.guild_id ?? null;
 		this.channel_id = data.channel_id;
 		this.author = new User(client, data.author);
 		this.content = data.content;
@@ -137,4 +141,12 @@ export default class Message {
 		this.poll = data.poll ?? null;
 		this.call = data.call ?? null;
 	}
+
+	get guild() {
+		return this.#client.guilds.getSync(this.guild_id as string) ?? null;
+	}
+
+	async reply(content: any) { 
+	}
 }
+module.exports = exports.default;

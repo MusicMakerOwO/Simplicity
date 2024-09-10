@@ -34,7 +34,7 @@ export default class GuildStickerHelper extends Helper {
 
 	override async getAll(): Promise<Sticker[]> {
 		const endpoint = ResolveEndpoint(Endpoints.GET_STICKERS, { guild: { id: this.guildID } });
-		const data = await this.#client.ws?.SendRequest('GET', endpoint) as APISticker[];
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APISticker[];
 		data.forEach(sticker => this.set(sticker.id, sticker));
 		const stickers = data.map(sticker => new Sticker(sticker));
 		return stickers;
@@ -43,7 +43,7 @@ export default class GuildStickerHelper extends Helper {
 	override async fetch(id: string): Promise<Sticker | undefined> {
 		if (!id) throw new Error('Sticker ID is required - If trying to fetch everything, use getAll()');
 		const endpoint = ResolveEndpoint(Endpoints.GET_STICKER, { guild: { id: this.guildID }, sticker: { id } });
-		const data = await this.#client.ws?.SendRequest('GET', endpoint) as APISticker;
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APISticker;
 		const sticker = this.#WrapInClass(data);
 		this.set(data.id, data);
 		return sticker;

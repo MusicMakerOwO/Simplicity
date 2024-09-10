@@ -6,3 +6,4 @@ enum InteractionType {
 	MODAL_SUBMIT = 5
 }
 export default InteractionType;
+module.exports = exports.default;

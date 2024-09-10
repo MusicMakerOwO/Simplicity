@@ -34,7 +34,7 @@ export default class GuildRoleHelper extends Helper {
 
 	override async getAll(): Promise<Role[]> {
 		const endpoint = ResolveEndpoint(Endpoints.GET_ROLES, { guild: { id: this.guildID } });
-		const data = await this.#client.ws?.SendRequest('GET', endpoint) as APIRole[];
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APIRole[];
 		data.forEach(role => this.set(role.id, role));
 		const roles = data.map(role => new Role(this.#client, role));
 		return roles;
@@ -43,7 +43,7 @@ export default class GuildRoleHelper extends Helper {
 	override async fetch(id: string): Promise<Role | undefined> {
 		if (!id) throw new Error('Role ID is required - If trying to fetch everything, use getAll()');
 		const endpoint = ResolveEndpoint(Endpoints.GET_ROLE, { guild: { id: this.guildID }, role: { id } });
-		const data = await this.#client.ws?.SendRequest('GET', endpoint) as APIRole;
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APIRole;
 		const role = new Role(this.#client, data);
 		this.set(data.id, data);
 		return role;
