@@ -38,7 +38,7 @@ export default class Client extends Events {
 	public user: User | null = null;
 
 	public guilds: ClientCache<APIGuild, Guild>;
-	public channels: ClientCache<APIChannel, Object>; // coming soon lol
+	public channels: ClientCache<APIChannel, Channel>;
 	public roles: ClientCache<APIRole, Role>;
 	public users: ClientCache<APIUser, User>;
 	public emojis: ClientCache<APIEmoji, Emoji>;
