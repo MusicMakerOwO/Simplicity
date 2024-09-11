@@ -32,7 +32,6 @@ export default class EventDispatcher {
 	dispatch(event: string, data: unknown) {
 		const eventHandler = this.#events.get(event);
 		if (!eventHandler) return console.error(`Internal event not found: ${event}`);
-		console.log(`Dispatching event: ${event}`);
 		eventHandler.execute(this.#client, data);
 	}
 }
