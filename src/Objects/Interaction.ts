@@ -8,6 +8,10 @@ import Member from './Member';
 import User from './User';
 import Message from './Message';
 
+import InteractionEndpoints from '../APITypes/Endpoints/Interactions';
+import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
+import ResolveEndpoint from '../Utils/ResolveEndpoint';
+
 /*
 export declare type APIInteraction = {
 	id: string;
@@ -33,11 +37,13 @@ export declare type APIInteraction = {
 */
 
 export default class Interaction {
+	#client: Client;
+
 	public readonly id: string;
 	public readonly application_id: string;
 	public readonly type: number;
 	public readonly data: APIInteractionData;
-	public readonly guild: Guild | null;
+	// public readonly guild: Guild | null;
 	public readonly guild_id: string;
 	public readonly channel: Channel | null;
 	public readonly channel_id: string;
@@ -54,15 +60,18 @@ export default class Interaction {
 	public readonly context: APIInteractionContext;
 
 	constructor(client: Client, data: APIInteraction) {
+		this.#client = client;
+
 		this.id = data.id;
 		this.application_id = data.application_id;
 		this.type = data.type;
 		this.data = data.data;
-		this.guild = data.guild ? new Guild(client, data.guild) : null;
+		// https://github.com/MusicMakerOwO/Simplicity/issues/1
+		// this.guild = data.guild ? client.guilds.getSync(data.guild.id) ?? null : null;
 		this.guild_id = data.guild_id;
 		this.channel = data.channel ? new Channel(client, data.channel) : null;
 		this.channel_id = data.channel_id;
-		this.member = (data.member && data.guild) ? new Member(client, data.member, this.guild as Guild) : null;
+		this.member = (data.member && data.guild) ? new Member(client, data.member, data.guild as unknown as Guild) : null;
 		this.user = data.user ? new User(client, data.user) : null;
 		this.token = data.token;
 		this.version = data.version;
@@ -73,6 +82,7 @@ export default class Interaction {
 		this.entitlements = data.entitlements;
 		this.authorizing_integration_owners = data.authorizing_integration_owners;
 		this.context = data.context;
+
 	}
 
 	isButton() {
@@ -97,6 +107,16 @@ export default class Interaction {
 
 	isPing() {
 		return this.type === InteractionType.PING;
+	}
+
+	async reply(content: any) {
+		const messagePaylod = ConvertMessagePayload(content);
+		const payload = {
+			type: 4,
+			data: messagePaylod
+		}
+		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this });
+		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
 	}
 
 }

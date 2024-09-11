@@ -12,6 +12,7 @@ export default class GuildRoleHelper extends Helper {
 		super(guildID);
 		this.#client = client;
 
+		// https://github.com/MusicMakerOwO/Simplicity/issues/1
 		for (const role of roles) {
 			this.cache.set(role.id, this.#WrapInClass(role));
 		}

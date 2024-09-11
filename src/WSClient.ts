@@ -27,6 +27,7 @@ export default class WSClient {
 	#GenerateHeaders() {
 		return {
 			Authorization: `Bot ${this.#token}`,
+			'Content-Type': 'application/json',
 			'User-Agent': `DiscordBot (${this.#client.id}, 1.0) Node.js/${process.version}`
 		};
 	}
@@ -53,8 +54,8 @@ export default class WSClient {
 		this.ws.on('open', () => this.#client.emit('events', 'Connected to Discord Gateway'));
 		this.ws.on('close', () => this.#client.emit('events', 'Disconnected from Discord Gateway'));
 		this.ws.on('error', (error: string) => this.#client.emit('events', `Error: `, error));
-		this.ws.on('message', (data: unknown) => this.#client.emit('events', `Received message: `, data));
-		this.ws.on('send', (data: unknown) => this.#client.emit('events', `Sent message: `, data));
+		this.ws.on('message', (data: unknown) => this.#client.emit('raw', `Received message: `, data));
+		this.ws.on('send', (data: unknown) => this.#client.emit('raw', `Sent message: `, data));
 
 		this.ws.on('close', CloseWS);
 		this.ws.on('error', CloseWS);
@@ -98,7 +99,7 @@ export default class WSClient {
 
 	static METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
-	SendRequest(method: string, resolvedEndpoint: string, options?: { body?: string, headers?: { [key: string]: any } }) : Promise<any> {
+	SendRequest(method: string, resolvedEndpoint: string, options?: { body?: any, headers?: { [key: string]: any } }) : Promise<object> {
 		if (!WSClient.METHODS.includes(method)) throw new Error(`Invalid method '${method}' - Must be one of ${WSClient.METHODS.join(', ')}`);
 		const { body, headers: additionalHeaders = {} } = options ?? {};
 		const BASE_HEADERS = this.#GenerateHeaders();
@@ -114,9 +115,13 @@ export default class WSClient {
 			req.on('response', (res) => {
 				const data: Array<string> = [];
 				res.on('data', data.push.bind(data));
-				res.on('end', () => resolve(data));
+				res.on('end', () => {
+					if (data.length === 0) return resolve({});
+					const parsed = JSON.parse(data.join(''));
+					resolve(parsed);
+				});
 			});
-			if (body) req.write(body);
+			if (body) req.write( JSON.stringify(body) );
 			req.end();
 		});
 	}

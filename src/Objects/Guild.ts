@@ -44,7 +44,7 @@ premium_progress_bar_enabled	boolean	whether the guild has the boost progress ba
 safety_alerts_channel_id	?snowflake	the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 */
 import { APIGuild, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
-import GuildRoleHelper from "../Helpers/Guilds/Roles";
+// import GuildRoleHelper from "../Helpers/Guilds/Roles";
 import Client from "../Client";
 import SnowflakeToDate from "../Utils/SnowflakeToDate";
 
@@ -66,7 +66,7 @@ export default class Guild {
 	public readonly verification_level: number;
 	public readonly default_message_notifications: number;
 	public readonly explicit_content_filter: number;
-	public readonly roles: GuildRoleHelper;
+	// public readonly roles: GuildRoleHelper;
 	public readonly emojis: Array<APIEmoji>;
 	public readonly features: Array<string>;
 	public readonly mfa_level: number;
@@ -140,7 +140,8 @@ export default class Guild {
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
 
-		this.roles = new GuildRoleHelper(client, this.id, data.roles);
+		// https://github.com/MusicMakerOwO/Simplicity/issues/1
+		// this.roles = new GuildRoleHelper(client, this.id, data.roles ?? []);
 		this.created_at = SnowflakeToDate(this.id);
 	}
 
