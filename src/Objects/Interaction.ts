@@ -9,6 +9,7 @@ import User from './User';
 import Message from './Message';
 
 import InteractionEndpoints from '../APITypes/Endpoints/Interactions';
+import InteractionCallbackType from '../Enums/InteractionCallbackType';
 import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
 import ResolveEndpoint from '../Utils/ResolveEndpoint';
 
@@ -59,6 +60,10 @@ export default class Interaction {
 	public readonly authorizing_integration_owners: Record<string, string>;
 	public readonly context: APIInteractionContext;
 
+	public replied: boolean;
+	public deferred: boolean;
+	public followup: boolean;
+
 	constructor(client: Client, data: APIInteraction) {
 		this.#client = client;
 
@@ -82,6 +87,10 @@ export default class Interaction {
 		this.entitlements = data.entitlements;
 		this.authorizing_integration_owners = data.authorizing_integration_owners;
 		this.context = data.context;
+
+		this.replied = false;
+		this.deferred = false;
+		this.followup = false;
 
 	}
 
@@ -109,15 +118,86 @@ export default class Interaction {
 		return this.type === InteractionType.PING;
 	}
 
-	async reply(content: any) {
+	async reply(content: any) : Promise<void> {
+		if (this.replied || this.deferred) return await this.editReply(content);
 		const messagePaylod = ConvertMessagePayload(content);
 		const payload = {
-			type: 4,
+			type: InteractionCallbackType.CHANNEL_MESSAGE_WITH_SOURCE,
 			data: messagePaylod
 		}
 		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this });
 		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+
+		this.replied = true;
 	}
 
+	async editReply(content: any) : Promise<void> {
+		if (!this.replied) return await this.reply(content);
+		const payload = ConvertMessagePayload(content);
+		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_RESPONSE, { interaction: this, client: this.#client });
+		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: payload });
+	}
+
+	async deleteReply() : Promise<void> {
+		if (!this.deferred || !this.replied) throw new Error('Cannot delete a reply that does not exist, either reply or defer first');
+		const endpoint = ResolveEndpoint(InteractionEndpoints.DELETE_RESPONSE, { interaction: this, client: this.#client });
+		await this.#client.wsClient?.SendRequest('DELETE', endpoint);
+	}
+
+	async deferReply(data: any) : Promise<void> {
+		if (this.deferred) throw new Error('Cannot defer twice an interaction twice');
+
+		const messagePaylod = ConvertMessagePayload(data);
+		const payload = {
+			type: InteractionCallbackType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+			data: messagePaylod
+		}
+		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this });
+		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+
+		this.deferred = true;
+		this.replied = true;
+
+		const MESSAGE_PROPERTIES = ['content', 'embeds', 'components'];
+		const hasMessage = Object.keys(messagePaylod).some(key => MESSAGE_PROPERTIES.includes(key));
+		if (hasMessage) {
+			await this.editReply(data);
+		}
+	}
+
+	async deferUpdate(data: any) : Promise<void> {
+		if (this.deferred) throw new Error('Cannot defer twice an interaction twice');
+		
+		const messagePaylod = ConvertMessagePayload(data);
+		const payload = {
+			type: InteractionCallbackType.DEFERRED_UPDATE_MESSAGE,
+			data: messagePaylod
+		}
+		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_RESPONSE, { interaction: this, client: this.#client });
+		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: payload });
+
+		this.deferred = true;
+		this.replied = true;
+
+		const MESSAGE_PROPERTIES = ['content', 'embeds', 'components'];
+		const hasMessage = Object.keys(messagePaylod).some(key => MESSAGE_PROPERTIES.includes(key));
+		if (hasMessage) {
+			await this.editReply(data);
+		}
+	}
+
+	async followUp(data: any) : Promise<void> {
+		const messagePaylod = ConvertMessagePayload(data);
+		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_FOLLOWUP, { interaction: this, client: this.#client });
+		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: messagePaylod });
+		this.followup = true;
+	}
+
+	async editFollowUp(id: string, data: any) : Promise<void> {
+		if (!this.followup) throw new Error('Cannot edit a followup that does not exist, use followUp() first');
+		const messagePaylod = ConvertMessagePayload(data);
+		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_FOLLOWUP, { interaction: this, client: this.#client, id });
+		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: messagePaylod });
+	}
 }
 module.exports = exports.default;

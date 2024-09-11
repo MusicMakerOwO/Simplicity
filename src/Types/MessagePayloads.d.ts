@@ -5,4 +5,5 @@ export declare type MessagePayload = {
 	embeds?: Array<MessageComponents.Embed>;
 	components?: Array<MessageComponents.ActionRow>;
 	hidden: boolean;
+	flags?: number;
 }

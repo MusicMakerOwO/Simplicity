@@ -3,7 +3,7 @@ import ActionRow from '../Builders/Components/ActionRow';
 
 export default function ConvertMessagePayload(data: any): MessagePayload {
 	if (!data) throw new Error('Invalid message payload, expected an object or string');
-	if (typeof data === 'string') return { content: data, hidden: false };
+	if (typeof data === 'string') return ConvertHiddenFlag({ content: data, hidden: false })
 
 	if ("type" in data) {
 		const payload: MessagePayload = { content: data.content, hidden: Boolean(data.hidden), components: [] };
@@ -12,14 +12,19 @@ export default function ConvertMessagePayload(data: any): MessagePayload {
 		// Button or select menu, forgot to wrap in action row
 		if (data.type === 2 || data.type === 3) payload.components = [ new ActionRow().addComponent(data) ];
 
-		return payload;
+		return ConvertHiddenFlag(payload);
 	}
 
-	return {
+	return ConvertHiddenFlag({
 		content: data.content,
 		embeds: data.embeds,
 		components: data.components,
 		hidden: data.hidden ?? false
-	};
+	});
+}
+
+function ConvertHiddenFlag(data: MessagePayload): MessagePayload {
+	if (data.hidden) data.flags = 64;
+	return data;
 }
 module.exports = exports.default;
