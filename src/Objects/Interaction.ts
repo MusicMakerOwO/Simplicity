@@ -13,6 +13,8 @@ import InteractionCallbackType from '../Enums/InteractionCallbackType';
 import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
 import ResolveEndpoint from '../Utils/ResolveEndpoint';
 
+import Modal from '../Builders/Components/Modal';
+
 /*
 export declare type APIInteraction = {
 	id: string;
@@ -63,6 +65,7 @@ export default class Interaction {
 	public replied: boolean;
 	public deferred: boolean;
 	public followup: boolean;
+	public modal: boolean;
 
 	constructor(client: Client, data: APIInteraction) {
 		this.#client = client;
@@ -91,7 +94,7 @@ export default class Interaction {
 		this.replied = false;
 		this.deferred = false;
 		this.followup = false;
-
+		this.modal = false;
 	}
 
 	isButton() {
@@ -198,6 +201,23 @@ export default class Interaction {
 		const messagePaylod = ConvertMessagePayload(data);
 		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_FOLLOWUP, { interaction: this, client: this.#client, id });
 		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: messagePaylod });
+	}
+
+	async showModal(data: Modal) : Promise<void> {
+		if (this.deferred) throw new Error('Cannot show a modal after deferring the interaction');
+		if (this.replied) throw new Error('Cannot show a modal after replying to the interaction');
+		if (this.followup) throw new Error('Cannot show a modal after following up to the interaction');
+
+		const modal = typeof data.toJSON === 'function' ? data.toJSON() : data;
+		const payload = {
+			type: InteractionCallbackType.MODAL,
+			data: modal
+		}
+
+		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this, client: this.#client });
+		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+
+		this.modal = true;
 	}
 }
 module.exports = exports.default;
