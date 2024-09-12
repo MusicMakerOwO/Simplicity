@@ -23,6 +23,7 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 
 	#WrapInClass(data: any): TOut | undefined {
 		if (!data) return undefined;
+		if (data instanceof this.exportClass) return data;
 		return new this.exportClass(this.#client, data);
 	}
 
@@ -44,7 +45,7 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 	}
 
 	WarnFullCache() {
-		if (this.fullWarning) return;
+		if (this.fullWarning || !this.endpoint) return;
 		console.warn(`Cache for '${this.#name}s' is full, consider increasing the cache size. (${this.cache.size}/${this.maxSize})`);
 		console.warn(`Endpoint: ${this.endpoint}`);
 		this.fullWarning = true;
@@ -60,6 +61,7 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 	}
 
 	async fetch(key: string): Promise<TIn | undefined> {
+		if (!this.endpoint) return undefined;
 		// TODO
 		return undefined;
 	}

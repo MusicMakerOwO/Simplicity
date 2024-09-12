@@ -7,6 +7,10 @@ export default {
 	execute: function (client: Client, data: APIMessage) {
 		const message = new Message(client, data);
 		client.emit('messageCreate', message);
+
+		const channel = client.channels.getSync(data.channel_id);
+		if (channel) channel.messages.set(data.id, data);
+		console.log(channel?.messages.toArray());
 	}
 }
 module.exports = exports.default;

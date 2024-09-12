@@ -13,7 +13,7 @@ import UserEndpoints from "./APITypes/Endpoints/Users";
 import EmojiEndpoints from "./APITypes/Endpoints/Emojis";
 import StickerEndpoints from "./APITypes/Endpoints/Sticker";
 
-import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker } from "./APITypes/Objects";
+import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker, APIMessage } from "./APITypes/Objects";
 
 import User from "./Objects/User";
 import Channel from "./Objects/Channel";
@@ -21,6 +21,7 @@ import Guild from "./Objects/Guild";
 import Role from "./Objects/Role";
 import Emoji from "./Objects/Emoji";
 import Sticker from "./Objects/Sticker";
+import Message from "./Objects/Message";
 
 import Range from "./Utils/Range";
 import ResolveEndpoint from "./Utils/ResolveEndpoint";
@@ -43,6 +44,7 @@ export default class Client extends Events {
 	public users: ClientCache<APIUser, User>;
 	public emojis: ClientCache<APIEmoji, Emoji>;
 	public stickers: ClientCache<APISticker, Sticker>;
+	public messages: ClientCache<APIMessage, Message>;
 
 	constructor(options : { token: string, intents: number | string[], shards: number }) {
 		super();
@@ -75,6 +77,7 @@ export default class Client extends Events {
 		this.users = new ClientCache(this, 2000, User, UserEndpoints.GET_USER);
 		this.emojis = new ClientCache(this, 2000, Emoji, EmojiEndpoints.GET_EMOJI);
 		this.stickers = new ClientCache(this, 2000, Sticker, StickerEndpoints.GET_STICKER);
+		this.messages = new ClientCache(this, 10_000, Message, '');
 	}
 
 	#ExtractIDFromToken(token: string): string {

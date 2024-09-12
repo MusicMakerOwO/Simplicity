@@ -159,6 +159,7 @@ export declare type APIGuild = {
 	verification_level: number;
 	default_message_notifications: number;
 	explicit_content_filter: number;
+	channels: Array<APIChannel>;
 	roles: Array<APIRole>;
 	emojis: Array<APIEmoji>;
 	features: Array<APIGuildFeatures>;

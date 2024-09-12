@@ -1,8 +1,9 @@
 import Client from '../Client';
-import { APIChannel } from '../APITypes/Objects';
+import { APIChannel, APIMessage } from '../APITypes/Objects';
 import BitField from '../DataStructures/BitField';
 import ChannelFlags from '../Enums/ChannelFlags';
 import ChannelTypes from '../Enums/ChannelTypes';
+import LRUCache from '../DataStructures/LRUCache';
 
 // import Endpoints from '../APITypes/Endpoints/Channels';
 // import ResolveEndpoint from '../Utils/ResolveEndpoint';
@@ -45,6 +46,7 @@ export default class Channel {
 	public readonly defaultThreadRateLimitPerUser: number | null;
 	public readonly defaultSortOrder: number | null;
 	public readonly defaultForumLayout: number | null;
+	public messages: LRUCache<string, APIMessage>;
 	
 	constructor(client: Client, data: APIChannel) {
 		this.#client = client;
@@ -85,6 +87,8 @@ export default class Channel {
 		this.defaultThreadRateLimitPerUser = data.default_thread_rate_limit_per_user ?? null;
 		this.defaultSortOrder = data.default_sort_order ?? null;
 		this.defaultForumLayout = data.default_forum_layout ?? null;
+
+		this.messages = new LRUCache<string, APIMessage>(1000);
 	}
 
 	static TEXT_CHANNEL_TYPES = [
