@@ -43,10 +43,12 @@ stickers?	array of sticker objects	custom guild stickers
 premium_progress_bar_enabled	boolean	whether the guild has the boost progress bar enabled
 safety_alerts_channel_id	?snowflake	the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 */
-import { APIGuild, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
-// import GuildRoleHelper from "../Helpers/Guilds/Roles";
+import { APIGuild, APIRole, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
 import Client from "../Client";
 import SnowflakeToDate from "../Utils/SnowflakeToDate";
+import Role from "./Role";
+import SlidingCache from "../DataStructures/SlidingCache";
+import RoleEndpoints from "../APITypes/Endpoints/Roles";
 
 export default class Guild {
 	#client: Client;
@@ -66,7 +68,7 @@ export default class Guild {
 	public readonly verification_level: number;
 	public readonly default_message_notifications: number;
 	public readonly explicit_content_filter: number;
-	// public readonly roles: GuildRoleHelper;
+	public readonly roles: SlidingCache<APIRole, Role>;
 	public readonly emojis: Array<APIEmoji>;
 	public readonly features: Array<string>;
 	public readonly mfa_level: number;
@@ -140,8 +142,7 @@ export default class Guild {
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
 
-		// https://github.com/MusicMakerOwO/Simplicity/issues/1
-		// this.roles = new GuildRoleHelper(client, this.id, data.roles ?? []);
+		this.roles = new SlidingCache<APIRole, Role>(client, 'roles', this.id, RoleEndpoints.GET_ROLE, RoleEndpoints.GET_ROLES, Role, 'role');
 		this.created_at = SnowflakeToDate(this.id);
 	}
 

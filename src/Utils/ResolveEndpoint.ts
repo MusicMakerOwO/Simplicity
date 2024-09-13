@@ -5,7 +5,7 @@ export default function ResolveEndpoint(endpoint: string, objects: { [key: strin
 	if (typeof endpoint !== 'string') throw new Error(`Invalid endpoint - Must be a string, received ${typeof endpoint}`);
 	
 	const inserts = endpoint.match(INSERTS_REGEX);
-	if (!inserts) return `${BASE_ENDPOINT}${endpoint}`;
+	if (!inserts) return endpoint.startsWith('http') ? endpoint : `${BASE_ENDPOINT}${endpoint}`;
 	
 	// guild_id -> object.guild.id
 	for (const insert of inserts) {
@@ -17,6 +17,7 @@ export default function ResolveEndpoint(endpoint: string, objects: { [key: strin
 		}
 		endpoint = endpoint.replace(insert, value);
 	}
-	return `${BASE_ENDPOINT}${endpoint}`;
+	// return `${BASE_ENDPOINT}${endpoint}`;
+	return endpoint.startsWith('http') ? endpoint : `${BASE_ENDPOINT}${endpoint}`;
 }
 module.exports = exports.default;

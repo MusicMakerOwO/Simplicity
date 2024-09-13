@@ -46,7 +46,7 @@ export default class Interaction {
 	public readonly application_id: string;
 	public readonly type: number;
 	public readonly data: APIInteractionData;
-	// public readonly guild: Guild | null;
+	public readonly guild: Guild | null;
 	public readonly guild_id: string;
 	public readonly channel: Channel | null;
 	public readonly channel_id: string;
@@ -74,8 +74,7 @@ export default class Interaction {
 		this.application_id = data.application_id;
 		this.type = data.type;
 		this.data = data.data;
-		// https://github.com/MusicMakerOwO/Simplicity/issues/1
-		// this.guild = data.guild ? client.guilds.getSync(data.guild.id) ?? null : null;
+		this.guild = data.guild ? client.guilds.getSync(data.guild.id) ?? null : null;
 		this.guild_id = data.guild_id;
 		this.channel = data.channel ? new Channel(client, data.channel) : null;
 		this.channel_id = data.channel_id;
