@@ -1,9 +1,10 @@
 import Client from '../Client';
-import Interaction from '../Objects/Interaction';
 import { APIInteraction } from '../APITypes/Objects';
+import { APIEvents } from '../APITypes/Enums';
+import Interaction from '../Objects/Interaction';
 
 export default {
-	name: 'INTERACTION_CREATE',
+	name: APIEvents.INTERACTION_CREATE,
 	execute: function (client: Client, data: APIInteraction) {
 		const interaction = new Interaction(client, data);
 		console.log('Emitting interactionCreate');

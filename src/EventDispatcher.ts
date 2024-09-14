@@ -1,5 +1,6 @@
 import fs from 'node:fs';
-import Client from './Client.js';
+import Client from './Client';
+import { APIEvents } from './APITypes/Enums';
 
 export default class EventDispatcher {
 
@@ -29,8 +30,13 @@ export default class EventDispatcher {
 		}
 	}
 
+	resolveEvent(event: string) : string | undefined {
+		return APIEvents[event as keyof typeof APIEvents];
+	}
+
 	dispatch(event: string, data: unknown) {
-		const eventHandler = this.#events.get(event);
+		const eventName = this.resolveEvent(event);
+		const eventHandler = this.#events.get(eventName as string);
 		if (!eventHandler) return console.error(`Internal event not found: ${event}`);
 		eventHandler.execute(this.#client, data);
 	}

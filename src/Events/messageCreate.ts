@@ -1,9 +1,10 @@
 import Client from "../Client";
 import { APIMessage } from "../APITypes/Objects";
+import { APIEvents } from "../APITypes/Enums";
 import Message from "../Objects/Message";
 
 export default {
-	name: 'MESSAGE_CREATE',
+	name: APIEvents.MESSAGE_CREATE,
 	execute: function (client: Client, data: APIMessage) {
 		const message = new Message(client, data);
 		client.emit('messageCreate', message);

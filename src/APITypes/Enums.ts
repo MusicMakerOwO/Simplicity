@@ -1,14 +1,4 @@
-// 0	Dispatch	Receive	An event was dispatched.
-// 1	Heartbeat	Send/Receive	Fired periodically by the client to keep the connection alive.
-// 2	Identify	Send	Starts a new session during the initial handshake.
-// 3	Presence Update	Send	Update the client's presence.
-// 4	Voice State Update	Send	Used to join/leave or move between voice channels.
-// 6	Resume	Send	Resume a previous session that was disconnected.
-// 7	Reconnect	Receive	You should attempt to reconnect and resume immediately.
-// 8	Request Guild Members	Send	Request information about offline guild members in a large guild.
-// 9	Invalid Session	Receive	The session has been invalidated. You should reconnect and identify/resume accordingly.
-// 10	Hello	Receive	Sent immediately after connecting, contains the heartbeat_interval to use.
-// 11	Heartbeat ACK	Receive	Sent in response to receiving a heartbeat to acknowledge that it has been received.
+// https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-opcodes
 export enum OPCodes {
 	DISPATCH = 0,
 	HEARTBEAT = 1,
@@ -23,3 +13,79 @@ export enum OPCodes {
 	HEARTBEAT_ACK = 11
 }
 
+
+// https://discord.com/developers/docs/topics/gateway-events#receive-events
+export enum APIEvents {
+	READY = 'ready',
+	RESUMED = 'resumed',
+	RECONNECT = 'reconnect',
+	INVALID_SESSION = 'invalidSession',
+	APPLICATION_COMMAND_PERMISSIONS_UPDATE = 'applicationCommandPermissionsUpdate',
+	AUTO_MODERATION_RULE_CREATE = 'autoModerationRuleCreate',
+	AUTO_MODERATION_RULE_UPDATE = 'autoModerationRuleUpdate',
+	AUTO_MODERATION_RULE_DELETE = 'autoModerationRuleDelete',
+	AUTO_MODERATION_ACTION_EXECUTION = 'autoModerationActionExecution',
+	CHANNEL_CREATE = 'channelCreate',
+	CHANNEL_UPDATE = 'channelUpdate',
+	CHANNEL_DELETE = 'channelDelete',
+	CHANNEL_PINS_UPDATE = 'channelPinsUpdate',
+	THREAD_CREATE = 'threadCreate',
+	THREAD_UPDATE = 'threadUpdate',
+	THREAD_DELETE = 'threadDelete',
+	THREAD_LIST_SYNC = 'threadListSync',
+	THREAD_MEMBER_UPDATE = 'threadMemberUpdate',
+	THREAD_MEMBERS_UPDATE = 'threadMembersUpdate',
+	ENTITLEMENT_CREATE = 'entitlementCreate',
+	ENTITLEMENT_UPDATE = 'entitlementUpdate',
+	ENTITLEMENT_DELETE = 'entitlementDelete',
+	GUILD_CREATE = 'guildCreate',
+	GUILD_UPDATE = 'guildUpdate',
+	GUILD_DELETE = 'guildDelete',
+	GUILD_AUDIT_LOG_ENTRY_CREATE = 'guildAuditLogEntryCreate',
+	GUILD_BAN_ADD = 'guildBanAdd',
+	GUILD_BAN_REMOVE = 'guildBanRemove',
+	GUILD_EMOJIS_UPDATE = 'guildEmojisUpdate',
+	GUILD_STICKERS_UPDATE = 'guildStickersUpdate',
+	GUILD_INTEGRATIONS_UPDATE = 'guildIntegrationsUpdate',
+	GUILD_MEMBER_ADD = 'guildMemberAdd',
+	GUILD_MEMBER_REMOVE = 'guildMemberRemove',
+	GUILD_MEMBER_UPDATE = 'guildMemberUpdate',
+	GUILD_MEMBERS_CHUNK = 'guildMembersChunk',
+	GUILD_ROLE_CREATE = 'guildRoleCreate',
+	GUILD_ROLE_UPDATE = 'guildRoleUpdate',
+	GUILD_ROLE_DELETE = 'guildRoleDelete',
+	GUILD_SCHEDULED_EVENT_CREATE = 'guildScheduledEventCreate',
+	GUILD_SCHEDULED_EVENT_UPDATE = 'guildScheduledEventUpdate',
+	GUILD_SCHEDULED_EVENT_DELETE = 'guildScheduledEventDelete',
+	GUILD_SCHEDULED_EVENT_USER_ADD = 'guildScheduledEventUserAdd',
+	GUILD_SCHEDULED_EVENT_USER_REMOVE = 'guildScheduledEventUserRemove',
+	INTEGRATION_CREATE = 'integrationCreate',
+	INTEGRATION_UPDATE = 'integrationUpdate',
+	INTEGRATION_DELETE = 'integrationDelete',
+	INTERACTION_CREATE = 'interactionCreate',
+	INVITE_CREATE = 'inviteCreate',
+	INVITE_DELETE = 'inviteDelete',
+	MESSAGE_CREATE = 'messageCreate',
+	MESSAGE_UPDATE = 'messageUpdate',
+	MESSAGE_DELETE = 'messageDelete',
+	MESSAGE_DELETE_BULK = 'messageDeleteBulk',
+	MESSAGE_REACTION_ADD = 'messageReactionAdd',
+	MESSAGE_REACTION_REMOVE = 'messageReactionRemove',
+	MESSAGE_REACTION_REMOVE_ALL = 'messageReactionRemoveAll',
+	MESSAGE_REACTION_REMOVE_EMOJI = 'messageReactionRemoveEmoji',
+	PRESENCE_UPDATE = 'presenceUpdate',
+	STAGE_INSTANCE_CREATE = 'stageInstanceCreate',
+	STAGE_INSTANCE_UPDATE = 'stageInstanceUpdate',
+	STAGE_INSTANCE_DELETE = 'stageInstanceDelete',
+	SUBSCRIPTION_CREATE = 'subscriptionCreate',
+	SUBSCRIPTION_UPDATE = 'subscriptionUpdate',
+	SUBSCRIPTION_DELETE = 'subscriptionDelete',
+	TYPING_START = 'typingStart',
+	USER_UPDATE = 'userUpdate',
+	VOICE_CHANNEL_EFFECT_SEND = 'voiceChannelEffectSend',
+	VOICE_STATE_UPDATE = 'voiceStateUpdate',
+	VOICE_SERVER_UPDATE = 'voiceServerUpdate',
+	WEBHOOKS_UPDATE = 'webhooksUpdate',
+	MESSAGE_POLL_VOTE_ADD = 'messagePollVoteAdd',
+	MESSAGE_POLL_VOTE_REMOVE = 'messagePollVoteRemove'
+}

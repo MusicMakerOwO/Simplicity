@@ -1,9 +1,10 @@
 import Client from '../Client';
 import { APIGuild } from '../APITypes/Objects';
+import { APIEvents } from '../APITypes/Enums';
 import Guild from '../Objects/Guild';
 
 export default {
-	name: 'GUILD_CREATE',
+	name: APIEvents.GUILD_CREATE,
 	execute: function(client: Client, data: APIGuild) {
 		client.guilds.set(data.id, data);
 
