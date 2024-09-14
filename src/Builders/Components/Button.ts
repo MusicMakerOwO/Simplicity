@@ -33,10 +33,21 @@ export default class Button {
 		return this;
 	}
 
-	setStyle(style: number) {
-		if (!(style in ButtonStyles)) throw new Error('Invalid button style - Must be between 1 and 6, try using the ButtonStyles enum');
-		if (style < 1 || style > 6) throw new Error('Invalid button style - Must be between 1 and 6');
-		this.style = style as 1 | 2 | 3 | 4 | 5 | 6;
+	setStyle(style: number | string) {
+		if (typeof style === 'string') {
+			const name = style.toUpperCase();
+			if (name in ButtonStyles) {
+				// @ts-ignore
+				this.style = ButtonStyles[name];
+			} else {
+				throw new Error('Invalid button style - Must be a valid color, try using the ButtonStyles enum');
+			}
+		} else if (typeof style === 'number') {
+			if (style < 1 || style > 6) throw new Error('Invalid button style - Must be between 1 and 6');
+			this.style = style as 1 | 2 | 3 | 4 | 5 | 6;
+		} else {
+			throw new Error('Invalid button style - Must be a number or string, try using the ButtonStyles enum');
+		}
 		return this;
 	}
 
