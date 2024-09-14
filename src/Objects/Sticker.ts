@@ -12,7 +12,12 @@
 // 	sort_value?: number;
 // };
 
-import { APISticker } from "../APITypes/Objects";
+import { APISticker, APIUser } from "../APITypes/Objects";
+import Client from "../Client";
+
+import User from "./User";
+
+import SnowflakeToDate from "../Utils/SnowflakeToDate";
 
 export default class Sticker {
 	public readonly id: string;
@@ -24,10 +29,12 @@ export default class Sticker {
 	public readonly format_type: number;
 	public readonly available: boolean | undefined;
 	public readonly guild_id: string | undefined;
-	public readonly user: any;
+	public readonly user: User | undefined;
 	public readonly sort_value: number | undefined;
 
-	constructor(data: APISticker) {
+	public readonly created_at: Date;
+
+	constructor(client: Client, data: APISticker) {
 		this.id = data.id;
 		this.pack_id = data.pack_id;
 		this.name = data.name;
@@ -37,8 +44,10 @@ export default class Sticker {
 		this.format_type = data.format_type;
 		this.available = data.available;
 		this.guild_id = data.guild_id;
-		this.user = data.user;
+		this.user = data.user ? new User(client, data.user as APIUser) : undefined;
 		this.sort_value = data.sort_value;
+
+		this.created_at = SnowflakeToDate(this.id);
 	}
 
 	getURL({ size = 256 }: { size?: number } = {}): string {

@@ -43,12 +43,16 @@ stickers?	array of sticker objects	custom guild stickers
 premium_progress_bar_enabled	boolean	whether the guild has the boost progress bar enabled
 safety_alerts_channel_id	?snowflake	the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord
 */
-import { APIGuild, APIRole, APIEmoji, APISticker, APIWelcomeScreen } from "../APITypes/Objects";
+import { APIGuild, APIRole, APIEmoji, APISticker, APIWelcomeScreen, APIChannel } from "../APITypes/Objects";
 import Client from "../Client";
 import SnowflakeToDate from "../Utils/SnowflakeToDate";
-import Role from "./Role";
 import SlidingCache from "../DataStructures/SlidingCache";
 import RoleEndpoints from "../APITypes/Endpoints/Roles";
+
+import Role from "./Role";
+import Emoji from "./Emoji";
+import Sticker from "./Sticker";
+import Channel from "./Channel";
 
 export default class Guild {
 	#client: Client;
@@ -68,8 +72,6 @@ export default class Guild {
 	public readonly verification_level: number;
 	public readonly default_message_notifications: number;
 	public readonly explicit_content_filter: number;
-	public readonly roles: SlidingCache<APIRole, Role>;
-	public readonly emojis: Array<APIEmoji>;
 	public readonly features: Array<string>;
 	public readonly mfa_level: number;
 	public readonly application_id: string | undefined;
@@ -91,10 +93,13 @@ export default class Guild {
 	public readonly approximate_presence_count: number | undefined;
 	public readonly welcome_screen: APIWelcomeScreen | undefined;
 	public readonly nsfw_level: number;
-	public readonly stickers: Array<APISticker>;
 	public readonly premium_progress_bar_enabled: boolean;
 	public readonly safety_alerts_channel_id: string | undefined;
-
+	
+	public readonly channels: SlidingCache<APIChannel, Channel>;
+	public readonly roles: SlidingCache<APIRole, Role>;
+	public readonly emojis: SlidingCache<APIEmoji, Emoji>;
+	public readonly stickers: SlidingCache<APISticker, Sticker>;
 	public readonly created_at: Date;
 	
 	constructor(client: Client, data: APIGuild) {
@@ -116,7 +121,6 @@ export default class Guild {
 		this.verification_level = data.verification_level;
 		this.default_message_notifications = data.default_message_notifications;
 		this.explicit_content_filter = data.explicit_content_filter;
-		this.emojis = data.emojis;
 		this.features = data.features;
 		this.mfa_level = data.mfa_level;
 		this.application_id = data.application_id;
@@ -138,11 +142,14 @@ export default class Guild {
 		this.approximate_presence_count = data.approximate_presence_count;
 		this.welcome_screen = data.welcome_screen;
 		this.nsfw_level = data.nsfw_level;
-		this.stickers = data.stickers ?? [];
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
 
-		this.roles = new SlidingCache<APIRole, Role>(client, 'roles', this.id, RoleEndpoints.GET_ROLE, RoleEndpoints.GET_ROLES, Role, 'role');
+		this.channels 	= new SlidingCache<APIChannel, Channel>	(client, 'channels',this.id, RoleEndpoints.GET_CHANNEL, RoleEndpoints.GET_CHANNELS, Channel,'channel');
+		this.roles 		= new SlidingCache<APIRole, Role>		(client, 'roles', 	this.id, RoleEndpoints.GET_ROLE, 	RoleEndpoints.GET_ROLES, 	Role, 	'role');
+		this.emojis 	= new SlidingCache<APIEmoji, Emoji>		(client, 'emojis', 	this.id, RoleEndpoints.GET_EMOJI, 	RoleEndpoints.GET_EMOJIS, 	Emoji,	'emoji');
+		this.stickers 	= new SlidingCache<APISticker, Sticker>	(client, 'stickers',this.id, RoleEndpoints.GET_STICKER, RoleEndpoints.GET_STICKERS, Sticker,'sticker');
+
 		this.created_at = SnowflakeToDate(this.id);
 	}
 

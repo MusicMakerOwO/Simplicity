@@ -1,9 +1,11 @@
 import Client from '../Client';
-import { APIChannel, APIMessage } from '../APITypes/Objects';
+import { APIChannel, APIDefaultReaction, APIForumTag, APIMessage, APIPermissionOverwrite, APIThreadMember, APIThreadMetadata, APIUser } from '../APITypes/Objects';
+import Message from './Message';
 import BitField from '../DataStructures/BitField';
 import ChannelFlags from '../Enums/ChannelFlags';
 import ChannelTypes from '../Enums/ChannelTypes';
-import LRUCache from '../DataStructures/LRUCache';
+import SnowflakeToDate from '../Utils/SnowflakeToDate';
+import SlidingCache from '../DataStructures/SlidingCache';
 
 // import Endpoints from '../APITypes/Endpoints/Channels';
 // import ResolveEndpoint from '../Utils/ResolveEndpoint';
@@ -15,7 +17,7 @@ export default class Channel {
 	public readonly type: number;
 	public readonly guildID: string | null;
 	public readonly position: number | null;
-	public readonly permissionOverwrites: Array<any> | null;
+	public readonly permissionOverwrites: Array<APIPermissionOverwrite> | null;
 	public readonly name: string | null;
 	public readonly topic: string | null;
 	public readonly nsfw: boolean;
@@ -23,7 +25,7 @@ export default class Channel {
 	public readonly bitrate: number | null;
 	public readonly userLimit: number | null;
 	public readonly rateLimitPerUser: number | null;
-	public readonly recipients: Array<any> | null;
+	public readonly recipients: Array<APIUser> | null;
 	public readonly icon: string | null;
 	public readonly ownerID: string | null;
 	public readonly applicationID: string | null;
@@ -34,19 +36,21 @@ export default class Channel {
 	public readonly videoQualityMode: number | null;
 	public readonly messageCount: number | null;
 	public readonly memberCount: number | null;
-	public readonly threadMetadata: any | null;
-	public readonly member: any | null;
+	public readonly threadMetadata: APIThreadMetadata | null;
+	public readonly member: APIThreadMember | null;
 	public readonly defaultAutoArchiveDuration: number | null;
 	public readonly permissions: string | null;
 	public readonly flags: BitField;
 	public readonly totalMessagesSent: number | null;
-	public readonly availableTags: Array<any> | null;
+	public readonly availableTags: Array<APIForumTag> | null;
 	public readonly appliedTags: Array<string> | null;
-	public readonly defaultReactionEmoji: any | null;
+	public readonly defaultReactionEmoji: APIDefaultReaction | null;
 	public readonly defaultThreadRateLimitPerUser: number | null;
 	public readonly defaultSortOrder: number | null;
 	public readonly defaultForumLayout: number | null;
-	public messages: LRUCache<string, APIMessage>;
+
+	public readonly messages: SlidingCache<APIMessage, Message>;
+	public readonly created_at: Date;
 	
 	constructor(client: Client, data: APIChannel) {
 		this.#client = client;
@@ -88,7 +92,8 @@ export default class Channel {
 		this.defaultSortOrder = data.default_sort_order ?? null;
 		this.defaultForumLayout = data.default_forum_layout ?? null;
 
-		this.messages = new LRUCache<string, APIMessage>(1000);
+		this.messages = new SlidingCache<APIMessage, Message>(client, 'messages', this.guildID as string, '', '', Message, ''); 
+		this.created_at = SnowflakeToDate(this.id);
 	}
 
 	static TEXT_CHANNEL_TYPES = [

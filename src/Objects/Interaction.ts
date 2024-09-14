@@ -15,6 +15,8 @@ import ResolveEndpoint from '../Utils/ResolveEndpoint';
 
 import Modal from '../Builders/Components/Modal';
 
+import SnowflakeToDate from '../Utils/SnowflakeToDate';
+
 /*
 export declare type APIInteraction = {
 	id: string;
@@ -62,6 +64,8 @@ export default class Interaction {
 	public readonly authorizing_integration_owners: Record<string, string>;
 	public readonly context: APIInteractionContext;
 
+	public readonly created_at: Date;
+
 	public replied: boolean;
 	public deferred: boolean;
 	public followup: boolean;
@@ -94,6 +98,8 @@ export default class Interaction {
 		this.deferred = false;
 		this.followup = false;
 		this.modal = false;
+
+		this.created_at = SnowflakeToDate(this.id);
 	}
 
 	isButton() {

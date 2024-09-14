@@ -20,6 +20,8 @@ import {
 import User from './User';
 import Channel from './Channel';
 
+import SnowflakeToDate from '../Utils/SnowflakeToDate';
+
 /*
 export declare type APIMessage = {
 	id: string;
@@ -101,6 +103,8 @@ export default class Message {
 	public readonly poll: APIPoll | null;
 	public readonly call: APIMessageCall | null;
 
+	public readonly created_at: Date;
+
 	constructor(client: Client, data: APIMessage) {
 		this.#client = client;
 
@@ -140,6 +144,8 @@ export default class Message {
 		this.resolved = data.resolved ?? null;
 		this.poll = data.poll ?? null;
 		this.call = data.call ?? null;
+
+		this.created_at = SnowflakeToDate(this.id);
 	}
 
 	get guild() {

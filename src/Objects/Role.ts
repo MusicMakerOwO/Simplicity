@@ -1,8 +1,7 @@
-import Endpoints from "../APITypes/Endpoints/Roles";
-export { Endpoints };
-
 import Client from '../Client';
 import { APIRole, APIRoleTags } from '../APITypes/Objects';
+
+import SnowflakeToDate from '../Utils/SnowflakeToDate';
 
 export default class Role {
 	public readonly id: string;
@@ -18,6 +17,8 @@ export default class Role {
 	public readonly tags: APIRoleTags;
 	public readonly flags: number;
 
+	public readonly created_at: Date;
+
 	constructor(client: Client, data: APIRole) {
 		this.id = data.id;
 		this.name = data.name;
@@ -31,6 +32,8 @@ export default class Role {
 		this.mentionable = Boolean(data.mentionable);
 		this.tags = data.tags ?? {};
 		this.flags = data.flags;
+
+		this.created_at = SnowflakeToDate(this.id);
 	}
 }
 module.exports = exports.default;

@@ -47,6 +47,7 @@ export default class User {
 	public readonly nitro_subscription: string;
 	public readonly public_flags: BitField;
 	public readonly avatar_decoration_data: APIAvatarDecoration | null;
+
 	public readonly created_at: Date;
 
 	#defaultAvatarID: number;
@@ -76,7 +77,9 @@ export default class User {
 
 		this.created_at = SnowflakeToDate(this.id);
 
-		this.#defaultAvatarID = this.discriminator === '0' ? Number(BigInt(this.id) >> 22n) % 6 : Number(this.discriminator) % 5;
+		this.#defaultAvatarID = this.discriminator === '0'
+			? Number(BigInt(this.id) >> 22n) % 6
+			: Number(this.discriminator) % 5;
 	}
 
 	get tag(): string {

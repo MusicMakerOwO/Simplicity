@@ -1,4 +1,6 @@
+import Client from "../Client";
 import { APIEmoji, APIUser } from "../APITypes/Objects";
+import SnowflakeToDate from "../Utils/SnowflakeToDate";
 
 export default class Emoji {
 	public readonly id: string;
@@ -10,7 +12,9 @@ export default class Emoji {
 	public readonly animated: boolean;
 	public readonly available: boolean;
 
-	constructor(data: APIEmoji) {
+	public readonly created_at: Date;
+
+	constructor(client: Client, data: APIEmoji) {
 		this.id = data.id;
 		this.name = data.name;
 		this.roles = data.roles ?? [];
@@ -19,6 +23,8 @@ export default class Emoji {
 		this.managed = Boolean(data.managed);
 		this.animated = Boolean(data.animated);
 		this.available = Boolean(data.available ?? true);
+
+		this.created_at = SnowflakeToDate(this.id);
 	}
 
 	getURL({ size = 256, dynamic = true }: { size?: number, dynamic?: boolean } = {}): string {
@@ -28,17 +34,6 @@ export default class Emoji {
 
 	toString(): string {
 		return `<${this.animated ? 'a' : ''}:${this.name}:${this.id}>`;
-	}
-
-	static fromString(emoji: string): Emoji {
-		const match = emoji.match(/<(?:(a):)?(\w+):(\d+)>/);
-		if (!match) throw new Error('Invalid emoji');
-		return new Emoji({
-			id: match.pop() as string,
-			name: match.pop() as string,
-			animated: Boolean(match.pop()),
-			available: true
-		});
 	}
 }
 module.exports = exports.default;
