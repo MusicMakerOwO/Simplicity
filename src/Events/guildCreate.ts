@@ -1,5 +1,6 @@
 import Client from '../Client';
 import { APIGuild } from '../APITypes/Objects';
+import Guild from '../Objects/Guild';
 
 export default {
 	name: 'GUILD_CREATE',
@@ -21,6 +22,9 @@ export default {
 		for (const sticker of data.stickers ?? []) {
 			client.stickers.set(sticker.id, sticker);
 		}
-	}	
+
+		const guild = new Guild(client, data);
+		client.emit('guildCreate', guild);
+	}
 }
 module.exports = exports.default;

@@ -3,11 +3,10 @@ import { APIMessage } from "../APITypes/Objects";
 import Message from "../Objects/Message";
 
 export default {
-	name: 'MESSAGE_CREATE',
+	name: 'MESSAGE_DELETE',
 	execute: function (client: Client, data: APIMessage) {
 		const message = new Message(client, data);
-		client.emit('messageCreate', message);
-		client.messages.set(data.id, data);
+		client.emit('messageDelete', message);
+		client.messages.delete(data.id);
 	}
 }
-module.exports = exports.default;
