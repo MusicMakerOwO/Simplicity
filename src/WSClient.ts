@@ -5,20 +5,29 @@ import Client from "./Client";
 import EventDispatcher from "./EventDispatcher";
 import HTTPS from 'node:https';
 
+declare type SessionStats = {
+	shards: number;
+	session_start_limit: {
+		total: number;
+		remaining: number;
+		reset_after: number;
+		max_concurrency: number;
+	};
+};
+
 export default class WSClient {
 
 	#token: string | null = null;
 	#client: Client;
-	public ws: Websocket | null;
 	public seq: number | null;
 	public heartbeat_interval: number;
-	public jitter = Math.random() * 0.5 + 0.5;
+	public jitter = Math.random() * 0.5 + 0.5; // 0.5 -> 1.0
 	public internalEvents: EventDispatcher;
 	public heartbeatInterval: NodeJS.Timeout | null = null;
-
+	public shards: Array<Websocket> = [];
+	
 	constructor(client: Client) {
 		this.#client = client;
-		this.ws = null;
 		this.seq = null;
 		this.heartbeat_interval = 0;
 		this.internalEvents = new EventDispatcher(client);
@@ -32,39 +41,60 @@ export default class WSClient {
 		};
 	}
 
-	sendHeartbeat() {
-		this.ws?.send({
+	sendHeartbeat(shardID: number) {
+		this.shards[shardID].send({
 			op: OPCodes.HEARTBEAT,
 			d: this.seq
 		});
+		this.#client.emit('events', `Sent heartbeat to shard ${shardID + 1}`);
 	}
 
-	connect(token?: string) {
-		if (token) this.#token = token;
-		if (!this.#token) throw new Error('No token provided');
+	async getRecommendedShards() : Promise<SessionStats> {
+		return await this.SendRequest('GET', 'https://discord.com/api/v10/gateway/bot') as SessionStats;
+	}
 
-		this.ws = new Websocket('wss://gateway.discord.gg/?v=9&encoding=json');
+	async connect(token?: string) {
+		if (token) this.#token = token;
+		this.#client.emit('events', 'Connecting to Discord Gateway');
+		this.#client.emit('events', 'Fetching recommended shards');
+
+		const shardData = await this.getRecommendedShards();
+		this.#client.emit('events', `Recommended shard count: ${shardData.shards}`);
+		this.#client.emit('events', `Session start limit: ${shardData.session_start_limit.remaining}/${shardData.session_start_limit.total} - Reset after ${shardData.session_start_limit.reset_after}ms`);
+		this.#client.emit('events', `Max concurrency: ${shardData.session_start_limit.max_concurrency}`);
+		this.#client.emit('events', `Starting ${shardData.shards} shards`);
+
+		for (let i = 0; i < shardData.shards; i++) {
+			this.#client.emit('events', `Connecting to shard ${i + 1}`);
+			this.WSConnect(i, shardData.shards);
+		}
+	}
+
+
+	WSConnect(shardID: number = 0, shard_count: number = 1) {
+		const ws = new Websocket('wss://gateway.discord.gg/?v=9&encoding=json');
+		this.shards[shardID] = ws;
 
 		const CloseWS = (error?: string) => {
 			if (error) console.error(error);
-			this.ws?.close();
+			ws?.close();
 			if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
 		}
 
-		this.ws.on('open', () => this.#client.emit('events', 'Connected to Discord Gateway'));
-		this.ws.on('close', () => this.#client.emit('events', 'Disconnected from Discord Gateway'));
-		this.ws.on('error', (error: string) => this.#client.emit('events', `Error: `, error));
-		this.ws.on('message', (data: unknown) => this.#client.emit('raw', `Received message: `, data));
-		this.ws.on('send', (data: unknown) => this.#client.emit('raw', `Sent message: `, data));
+		ws.on('open', () => this.#client.emit('events', 'Connected to Discord Gateway'));
+		ws.on('close', () => this.#client.emit('events', 'Disconnected from Discord Gateway'));
+		ws.on('error', (error: string) => this.#client.emit('events', `Error: `, error));
+		ws.on('message', (data: unknown) => this.#client.emit('raw', `Received message: `, data));
+		ws.on('send', (data: unknown) => this.#client.emit('raw', `Sent message: `, data));
 
-		this.ws.on('close', CloseWS);
-		this.ws.on('error', CloseWS);
+		ws.on('close', CloseWS);
+		ws.on('error', CloseWS);
 
-		this.ws.on('message', (data: HelloEvent | GatewayPayload) => {
+		ws.on('message', (data: HelloEvent | GatewayPayload) => {
 			this.#client.emit('events', `Received ${OPCodes[data.op]} event`);
 
 			if (data.op === OPCodes.HELLO) {
-				this.ws?.send({
+				ws.send({
 					op: OPCodes.IDENTIFY,
 					d: {
 						token: `Bot ${this.#token}`,
@@ -72,18 +102,19 @@ export default class WSClient {
 						properties: {
 							os: process.platform,
 							device: 'Simplicity'
-						}
+						},
+						shard: [shardID, shard_count],
 					}
 				})
 				this.heartbeat_interval = data.d.heartbeat_interval;
-				this.sendHeartbeat();
-				this.heartbeatInterval = setInterval(this.sendHeartbeat, this.heartbeat_interval * this.jitter);
+				this.sendHeartbeat(shardID);
+				this.heartbeatInterval = setInterval(this.sendHeartbeat.bind(this, shardID), this.heartbeat_interval * this.jitter);
 				this.#client.connected_at = new Date();
 			}
 
 			if (data.op === OPCodes.HEARTBEAT) {
 				this.seq = data.d;
-				this.sendHeartbeat();
+				this.sendHeartbeat(shardID);
 			}
 
 			if (data.op === OPCodes.DISPATCH) {
@@ -94,7 +125,10 @@ export default class WSClient {
 
 	close() {
 		this.#client.connected_at = null;
-		this.ws?.close();
+		this.#client.emit('events', 'Closing all shards');
+		for (const shard of Object.values(this.shards)) {
+			shard.close();
+		}
 	}
 
 	static METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];

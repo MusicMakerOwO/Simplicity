@@ -46,17 +46,19 @@ export default class Client extends Events {
 	public stickers: ClientCache<APISticker, Sticker>;
 	public messages: ClientCache<APIMessage, Message>;
 
-	constructor(options : { token: string, intents: number | string[], shards: number }) {
+	constructor(options : { token: string, intents: number | string[], cacheSize?: number }) {
 		super();
 
-		options.shards = Range(1, Number(options.shards ?? 0), 250);
+		options.cacheSize = Range(1, Number(options.cacheSize ?? 0), 100_000);
+		if (options.cacheSize >= 10_000) {
+			console.warn('Cache size is over 10,000 - This may cause excess memory usage and slow down your system');
+			console.warn('Consider reducing the cache size or switching to separate sharding');
+		}
 
 		if (!options.token) throw new Error('No token provided');
 		if (!options.intents) throw new Error('No intents provided');
-		if (!options.shards) throw new Error('No shards provided');
 
 		if (typeof options.token !== 'string') throw new Error('Invalid token value, must be a string');
-		if (typeof options.shards !== 'number') throw new Error('Invalid shards value, must be a number');
 		if (typeof options.intents !== 'number' && !Array.isArray(options.intents)) throw new Error('Invalid intents value, must be a number or an array of strings');
 
 		if (typeof options.intents === 'number') {
