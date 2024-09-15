@@ -19,16 +19,15 @@ export default class WSClient {
 
 	#token: string | null = null;
 	#client: Client;
-	public seq: number | null;
 	public heartbeat_interval: number;
 	public jitter = Math.random() * 0.5 + 0.5; // 0.5 -> 1.0
 	public internalEvents: EventDispatcher;
 	public heartbeatInterval: NodeJS.Timeout | null = null;
 	public shards: Array<Websocket> = [];
+	public shard_seq: Array<number> = [];
 	
 	constructor(client: Client) {
 		this.#client = client;
-		this.seq = null;
 		this.heartbeat_interval = 0;
 		this.internalEvents = new EventDispatcher(client);
 	}
@@ -44,7 +43,7 @@ export default class WSClient {
 	sendHeartbeat(shardID: number) {
 		this.shards[shardID].send({
 			op: OPCodes.HEARTBEAT,
-			d: this.seq
+			d: this.shard_seq[shardID] ?? null
 		});
 		this.#client.emit('events', `Sent heartbeat to shard ${shardID + 1}`);
 	}
@@ -77,7 +76,7 @@ export default class WSClient {
 
 		const CloseWS = (error?: string) => {
 			if (error) console.error(error);
-			ws?.close();
+			ws.close();
 			if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
 		}
 
@@ -113,7 +112,7 @@ export default class WSClient {
 			}
 
 			if (data.op === OPCodes.HEARTBEAT) {
-				this.seq = data.d;
+				this.shard_seq[shardID] = data.d;
 				this.sendHeartbeat(shardID);
 			}
 
