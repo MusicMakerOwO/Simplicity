@@ -86,6 +86,16 @@ export enum APIStickerFormat {
 	GIF = 4
 }
 
+export declare type APIStickerPack = {
+	id: string;
+	stickers: Array<APISticker>;
+	name: string;
+	sku_id: string;
+	cover_sticker_id?: string;
+	description: string;
+	banner_asset_id?: string;
+}
+
 export declare type APISticker = {
 	id: string;
 	pack_id?: string;
