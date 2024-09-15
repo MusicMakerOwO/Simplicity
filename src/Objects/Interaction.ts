@@ -78,11 +78,11 @@ export default class Interaction {
 		this.application_id = data.application_id;
 		this.type = data.type;
 		this.data = data.data;
-		this.guild = data.guild ? client.guilds.getSync(data.guild.id) ?? null : null;
+		this.guild = client.guilds.getSync(data.guild?.id as string) ?? null;
 		this.guild_id = data.guild_id;
 		this.channel = data.channel ? new Channel(client, data.channel) : null;
 		this.channel_id = data.channel_id;
-		this.member = (data.member && data.guild) ? new Member(client, data.member, data.guild as unknown as Guild) : null;
+		this.member = (data.member && this.guild) ? new Member(client, data.member, this.guild) : null;
 		this.user = data.user ? new User(client, data.user) : null;
 		this.token = data.token;
 		this.version = data.version;
@@ -127,6 +127,8 @@ export default class Interaction {
 	}
 
 	async reply(content: any) : Promise<void> {
+		if (this.isAutocomplete()) throw new Error('Cannot reply() to an autocomplete interaction, use autocomplete() instead');
+
 		if (this.replied || this.deferred) return await this.editReply(content);
 
 		const messagePaylod = ConvertMessagePayload(content);
@@ -141,6 +143,8 @@ export default class Interaction {
 	}
 
 	async editReply(content: any) : Promise<void> {
+		if (this.isAutocomplete()) throw new Error('Cannot edit an autocomplete interaction, there is no message to edit');
+
 		if (!this.replied || !this.deferred) return await this.reply(content);
 
 		const payload = ConvertMessagePayload(content);
@@ -149,6 +153,8 @@ export default class Interaction {
 	}
 
 	async deleteReply() : Promise<void> {
+		if (this.isAutocomplete()) throw new Error('Cannot delete an autocomplete interaction, there is no message to delete');
+
 		if (!this.deferred && !this.replied) throw new Error('Cannot delete a reply that does not exist, either reply or defer first');
 
 		const endpoint = ResolveEndpoint(InteractionEndpoints.DELETE_RESPONSE, { interaction: this, client: this.#client });
@@ -156,6 +162,8 @@ export default class Interaction {
 	}
 
 	async deferInteraction(data: any, callbackType: InteractionCallbackType, method: 'POST' | 'PATCH', endpoint: string) : Promise<void> {
+		if (this.isAutocomplete()) throw new Error('Cannot defer an autocomplete interaction, consider caching your results for faster responses');
+
 		if (this.replied) throw new Error('Cannot defer after replying to the interaction');
 		if (this.deferred) throw new Error('Cannot defer twice an interaction twice');
 		if (this.followup) throw new Error('Cannot defer after following up to the interaction');
@@ -190,6 +198,8 @@ export default class Interaction {
 	}
 
 	async followUp(data: any) : Promise<void> {
+		if (this.isAutocomplete()) throw new Error('Cannot use followUp() on autocomplete interactions');
+
 		if (this.modal) throw new Error('Cannot follow up after showing a modal');
 
 		const messagePaylod = ConvertMessagePayload(data);
@@ -207,6 +217,8 @@ export default class Interaction {
 	}
 
 	async showModal(data: Modal) : Promise<void> {
+		if (this.isAutocomplete()) throw new Error('Cannot show a modal after an autocomplete interaction');
+
 		if (this.deferred) throw new Error('Cannot show a modal after deferring the interaction');
 		if (this.replied) throw new Error('Cannot show a modal after replying to the interaction');
 		if (this.followup) throw new Error('Cannot show a modal after following up to the interaction');
@@ -222,6 +234,45 @@ export default class Interaction {
 		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
 
 		this.modal = true;
+	}
+
+	// interaction.autocomplete(
+	//   { name: 'test', value: 'test' },
+	//   { name: 'test2', value: 'test2' }
+	// );
+	// interaction.autocomplete([
+	//   { name: 'test', value: 'test' },
+	//   { name: 'test2', value: 'test2' }
+	// ]);
+	// interaction.autocomplete(['test', 'test2']);
+	// interaction.autocomplete('test', 'test2');
+
+	async autocomplete(...data: Array<string> | Array<{ name: string, value?: string }>) : Promise<void> {
+		if (!this.isAutocomplete()) throw new Error('This function can only be used on autocomplete interactions');
+		if (this.replied) throw new Error('You have already sent a response to this interaction');
+
+		const options: Array<{ name: string, value?: string }> = [];
+
+		for (const item of data.flat(Infinity)) {
+			if (typeof item === 'string') {
+				options.push({ name: item, value: item });
+			} else {
+				if (!item.value) item.value = item.name;
+				options.push(item);
+			}
+		}
+
+		const payload = {
+			type: InteractionCallbackType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT,
+			data: {
+				choices: options
+			}
+		}
+
+		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this });
+		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+
+		this.replied = true;
 	}
 }
 module.exports = exports.default;
