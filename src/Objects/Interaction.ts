@@ -212,7 +212,7 @@ export default class Interaction {
 		if (!this.followup) throw new Error('Cannot edit a followup that does not exist, use followUp() first');
 
 		const messagePaylod = ConvertMessagePayload(data);
-		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_FOLLOWUP, { interaction: this, client: this.#client, id });
+		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_FOLLOWUP, { interaction: this, client: this.#client, message: { id } });
 		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: messagePaylod });
 	}
 
