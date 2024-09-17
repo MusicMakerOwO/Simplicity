@@ -69,6 +69,15 @@ export default class WSClient {
 		}
 	}
 
+	WSSend(shardID: number, payload: Object) {
+		this.shards[shardID].send(payload);
+	}
+
+	WSSendBulk(payload: Object) {
+		for (let i = 0; i < this.shards.length; i++) {
+			this.WSSend(i, payload);
+		}
+	} 
 
 	WSConnect(shardID: number = 0, shard_count: number = 1) {
 		const ws = new Websocket('wss://gateway.discord.gg/?v=9&encoding=json');
