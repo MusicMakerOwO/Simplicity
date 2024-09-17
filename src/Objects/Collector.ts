@@ -13,7 +13,7 @@ export default class Collector extends EventEmitter {
 	public readonly interaction: Interaction;
 	public readonly messageID: string | null;
 
-	constructor(client: Client, interaction: Interaction & { message?: { id: string } }) {
+	constructor(client: Client, interaction: Interaction & { message: { id: string } }) {
 		super();
 		this.#client = client;
 		this.interaction = interaction;
@@ -22,7 +22,7 @@ export default class Collector extends EventEmitter {
 		this.#client.collectorLookup.set(`${interaction.channel_id}::${this.messageID}`, this);
 
 		this.resetTimeout();
-		this.on('collect', this.resetTimeout);
+		// this.on('collect', this.resetTimeout);
 	}
 
 	resetTimeout() {
@@ -40,7 +40,7 @@ export default class Collector extends EventEmitter {
 	}
 
 	handleInteraction(interaction: Interaction) {
-		// if (interaction.message?.id !== this.messageID) return;
+		if (interaction.message?.id !== this.messageID) return;
 		const events = this.events.get('collect') as Function[];
 		for (const event of events) {
 			event(interaction);

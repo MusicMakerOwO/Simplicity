@@ -1,22 +1,26 @@
 import Client from '../Client';
 import LRUCache from './LRUCache';
 
+import ResolveEndpoint from '../Utils/ResolveEndpoint';
+
 declare type ClassConstructor<T> = new (...args: any[]) => T;
 
 export default class ClientCache<TIn extends Object, TOut extends Object> {
 	#client: Client;
 	public readonly maxSize: number;
 	public readonly exportClass: ClassConstructor<TOut>;
+	public readonly endpointKey: string;
 	public readonly endpoint: string;
 	public readonly cache: LRUCache<string, TIn>;
 	#name: string;
 	public fullWarning: boolean = false;
 
-	constructor(client: Client, maxSize: number, exportClass: ClassConstructor<TOut>, endpoint: string) {
+	constructor(client: Client, maxSize: number, exportClass: ClassConstructor<TOut>, endpointKey: string, endpoint: string) {
 		this.#name = exportClass.name;
 		this.#client = client;
 		this.maxSize = maxSize;
 		this.exportClass = exportClass;
+		this.endpointKey = endpointKey;
 		this.endpoint = endpoint;
 		this.cache = new LRUCache<string, TIn>(maxSize);
 	}
@@ -60,10 +64,21 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 		if (this.cache.size >= this.maxSize) this.WarnFullCache();
 	}
 
+	// guildID::itemID
 	async fetch(key: string): Promise<TIn | undefined> {
 		if (!this.endpoint) return undefined;
-		// TODO
-		return undefined;
+
+		let [ guildID, itemID ] = key.split('::');
+		if (!itemID) itemID = guildID;
+
+		const endpoint = ResolveEndpoint(this.endpoint, { 'guild': { id: guildID }, [this.endpointKey]: { id: itemID } });
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint);
+		if (!data) return undefined;
+
+		// @ts-ignore
+		this.cache.set(key, data);
+		// @ts-ignore
+		return this.#WrapInClass(data);
 	}
 
 	clear(): void {

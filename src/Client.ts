@@ -77,13 +77,13 @@ export default class Client extends Events {
 		this.wsClient = new WSClient(this);
 		this.id = this.#ExtractIDFromToken(this.#token);
 
-		this.guilds = new ClientCache(this, 2000, Guild, GuildEndpoints.GET_GUILD);
-		this.channels = new ClientCache(this, 2000, Channel, ChannelEndpoints.GET_CHANNEL);
-		this.roles = new ClientCache(this, 2000, Role, RoleEndpoints.GET_ROLE);
-		this.users = new ClientCache(this, 2000, User, UserEndpoints.GET_USER);
-		this.emojis = new ClientCache(this, 2000, Emoji, EmojiEndpoints.GET_EMOJI);
-		this.stickers = new ClientCache(this, 2000, Sticker, StickerEndpoints.GET_STICKER);
-		this.messages = new ClientCache(this, 10_000, Message, '');
+		this.guilds 	= new ClientCache(this, 2000, Guild, 	'guild', 	GuildEndpoints.GET_GUILD	);
+		this.channels 	= new ClientCache(this, 2000, Channel, 	'channel', 	ChannelEndpoints.GET_CHANNEL);
+		this.roles 		= new ClientCache(this, 2000, Role, 	'role', 	RoleEndpoints.GET_ROLE		);
+		this.users 		= new ClientCache(this, 2000, User, 	'user', 	UserEndpoints.GET_USER		);
+		this.emojis 	= new ClientCache(this, 2000, Emoji, 	'emoji', 	EmojiEndpoints.GET_EMOJI	);
+		this.stickers 	= new ClientCache(this, 2000, Sticker, 	'sticker',	StickerEndpoints.GET_STICKER);
+		this.messages 	= new ClientCache(this,10000, Message,  'message', 	''							);
 	}
 
 	#ExtractIDFromToken(token: string): string {
