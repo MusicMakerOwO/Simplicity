@@ -10,7 +10,6 @@ export default {
 
 		const activeCollector = client.collectorLookup.get(`${interaction.channel_id}::${interaction.message?.id}`);
 		if (activeCollector) {
-			console.log('Collector found');
 			activeCollector.handleInteraction(interaction);
 		} else {
 			client.emit('interactionCreate', interaction);
