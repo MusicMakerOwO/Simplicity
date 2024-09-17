@@ -7,8 +7,14 @@ export default {
 	name: APIEvents.INTERACTION_CREATE,
 	execute: function (client: Client, data: APIInteraction) {
 		const interaction = new Interaction(client, data);
-		console.log('Emitting interactionCreate');
-		client.emit('interactionCreate', interaction);
+
+		const activeCollector = client.collectorLookup.get(`${interaction.channel_id}::${interaction.message?.id}`);
+		if (activeCollector) {
+			console.log('Collector found');
+			activeCollector.handleInteraction(interaction);
+		} else {
+			client.emit('interactionCreate', interaction);
+		}
 	}
 }
 module.exports = exports.default;

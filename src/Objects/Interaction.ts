@@ -1,5 +1,5 @@
 import Client from '../Client';
-import { APIInteraction, APIInteractionData, APIInteractionEntitlement, APIInteractionContext } from '../APITypes/Objects';
+import { APIMessage, APIInteraction, APIInteractionData, APIInteractionEntitlement, APIInteractionContext } from '../APITypes/Objects';
 import InteractionType from '../Enums/InteractionType';
 
 import Guild from './Guild';
@@ -16,6 +16,8 @@ import ResolveEndpoint from '../Utils/ResolveEndpoint';
 import Modal from '../Builders/Components/Modal';
 
 import SnowflakeToDate from '../Utils/SnowflakeToDate';
+
+import Collector from './Collector';
 
 /*
 export declare type APIInteraction = {
@@ -56,7 +58,6 @@ export default class Interaction {
 	public readonly user: User | null;
 	public readonly token: string;
 	public readonly version: number;
-	public readonly message: Message | null;
 	public readonly app_permissions: string;
 	public readonly locale: string | null;
 	public readonly guild_locale: string;
@@ -64,8 +65,11 @@ export default class Interaction {
 	public readonly authorizing_integration_owners: Record<string, string>;
 	public readonly context: APIInteractionContext;
 
+	public readonly customID: string | null;
+	
 	public readonly created_at: Date;
-
+	public message: Message | null;
+	
 	public replied: boolean;
 	public deferred: boolean;
 	public followup: boolean;
@@ -93,6 +97,9 @@ export default class Interaction {
 		this.entitlements = data.entitlements;
 		this.authorizing_integration_owners = data.authorizing_integration_owners;
 		this.context = data.context;
+		
+		this.customID = this.data.custom_id ?? null;
+
 
 		this.replied = false;
 		this.deferred = false;
@@ -126,6 +133,19 @@ export default class Interaction {
 		return this.type === InteractionType.PING;
 	}
 
+	async fetchReply() {
+		// InteractionEndpoints.GET_RESPONSE;
+		if (this.isAutocomplete()) throw new Error('Cannot fetch a reply on autocomplete interactions');
+		if (this.isModalSubmit()) throw new Error('Cannot fetch a reply on modal submit interactions');
+
+		if (!this.replied) throw new Error('Cannot fetch a reply that does not exist, you must reply() first');
+
+		const endpoint = ResolveEndpoint(InteractionEndpoints.GET_RESPONSE, { interaction: this, client: this.#client });
+		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APIMessage;
+		this.message = new Message(this.#client, data);
+		return this.message;
+	}
+
 	async reply(content: any) : Promise<void> {
 		if (this.isAutocomplete()) throw new Error('Cannot reply() to an autocomplete interaction, use autocomplete() instead');
 
@@ -140,6 +160,8 @@ export default class Interaction {
 		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
 
 		this.replied = true;
+
+		await this.fetchReply();		
 	}
 
 	async editReply(content: any) : Promise<void> {
@@ -273,6 +295,10 @@ export default class Interaction {
 		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
 
 		this.replied = true;
+	}
+
+	createCollector() {
+		return new Collector(this.#client, this);
 	}
 }
 module.exports = exports.default;

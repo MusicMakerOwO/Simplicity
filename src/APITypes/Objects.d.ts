@@ -595,6 +595,7 @@ export declare type APIInteractionData = {
 	options: Array<APIInteractionOption>;
 	guild_id: string;
 	target_id: string;
+	custom_id: string;
 };
 
 export declare type APIResolvedData = {

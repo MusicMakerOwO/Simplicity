@@ -5,6 +5,7 @@ import Events from "./Events";
 import ResolveIntents from "./Utils/ResolveIntents";
 import ClientCache from "./DataStructures/ClientCache";
 import SlashCommand from "./Builders/Commands/SlashCommand";
+import Collector from "./Objects/Collector";
 
 import GuildEndpoints from "./APITypes/Endpoints/Guilds";
 import ChannelEndpoints from "./APITypes/Endpoints/Channels";
@@ -45,6 +46,9 @@ export default class Client extends Events {
 	public emojis: ClientCache<APIEmoji, Emoji>;
 	public stickers: ClientCache<APISticker, Sticker>;
 	public messages: ClientCache<APIMessage, Message>;
+
+	// <channelID::messageID, Collector>
+	public collectorLookup: Map<string, Collector> = new Map();
 
 	constructor(options : { token: string, intents: number | string[], cacheSize?: number }) {
 		super();

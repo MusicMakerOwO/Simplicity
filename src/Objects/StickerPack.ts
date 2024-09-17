@@ -37,3 +37,4 @@ export default class StickerPack {
 		this.createdAt = SnowflakeToDate(this.id);
 	}
 }
+module.exports = exports.default;
