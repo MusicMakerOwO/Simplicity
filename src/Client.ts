@@ -28,6 +28,9 @@ import Range from "./Utils/Range";
 import ResolveEndpoint from "./Utils/ResolveEndpoint";
 import CommandEndpoints from "./APITypes/Endpoints/Commands";
 
+import { Status, Pressence } from "./Enums/Status";
+import { OPCodes } from "./APITypes/Enums";
+
 const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_-]{26}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{38})$/;
 
 export default class Client extends Events {
@@ -119,6 +122,41 @@ export default class Client extends Events {
 		this.removeAllListeners();
 	}
 
+	async setStatus(status: keyof typeof Pressence) : Promise<void> {
+		status = status.toUpperCase() as keyof typeof Pressence;
+
+		const payload = {
+			op: OPCodes.PRESENCE_UPDATE,
+			d: {
+				status: Pressence[status],
+				since: null,
+				afk: false,
+				activities: []
+			}
+		}
+		console.log(payload)
+		this.wsClient?.WSSendBulk(payload);
+	}
+
+	async setStatusMessage(type: keyof typeof Status, message: string) {
+		const activity = {
+			name: 'literally any string lol',
+			state: message,
+			type: Status.Custom
+		}
+
+		const payload = {
+			op: OPCodes.PRESENCE_UPDATE,
+			d: {
+				status: Pressence.ONLINE,
+				since: null,
+				afk: false,
+				activities: [activity]
+			}
+		}
+
+		this.wsClient?.WSSendBulk(payload);
+	}
 
 	// client.registerCommands(...commands, 'guildID');
 	// client.registerCommands([...commands], 'guildID');
