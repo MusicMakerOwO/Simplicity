@@ -1,10 +1,10 @@
 export enum Status {
-    Playing = 0,
-    Streaming = 1,
-    Listening = 2,
-    Watching = 3,
-    Custom = 4,
-    Competing = 5
+    PLAYING = 0,
+	STREAMING = 1,
+	LISTENING = 2,
+	WATCHING = 3,
+	CUSTOM = 4,
+	COMPETING = 5
 } 
 
 export enum Pressence { 
