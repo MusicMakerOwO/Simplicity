@@ -22,7 +22,6 @@ export default class Collector extends EventEmitter {
 		this.#client.collectorLookup.set(`${interaction.channel_id}::${this.messageID}`, this);
 
 		this.resetTimeout();
-		// this.on('collect', this.resetTimeout);
 	}
 
 	resetTimeout() {
@@ -41,6 +40,9 @@ export default class Collector extends EventEmitter {
 
 	handleInteraction(interaction: Interaction) {
 		if (interaction.message?.id !== this.messageID) return;
+
+		this.resetTimeout();
+
 		const events = this.events.get('collect') as Function[];
 		for (const event of events) {
 			event(interaction);
