@@ -175,9 +175,6 @@ export default class Guild {
 	async createChannel(data: ChannelCreationOptions) : Promise<Channel> {
 		const endpoint = ResolveEndpoint(GuildEndpoints.CREATE_CHANNEL, { guild: this })
 		const response = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: data }) as APIChannel;
-
-		console.log('channel created')
-		
 		return new Channel(this.#client, response)
 	}
 }

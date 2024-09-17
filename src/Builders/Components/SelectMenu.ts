@@ -33,7 +33,7 @@ export default class SelectMenu {
 		return this;
 	}
 
-	addOption(...option: SelectMenuOption[]) {
+	addOptions(...option: SelectMenuOption[]) {
 		option = option.flat();
 		this.options.push(...option);
 		return this;

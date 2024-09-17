@@ -58,7 +58,6 @@ export default class Channel {
 
 	constructor(client: Client, data: APIChannel) {
 		this.#client = client;
-		this.#client;
 
 		this.id = data.id;
 		this.type = data.type;
@@ -97,8 +96,6 @@ export default class Channel {
 		this.defaultForumLayout = data.default_forum_layout ?? null;
 
 		this.currentlyTyping = false;
-
-		console.log(data);
 
 		this.messages = new SlidingCache<APIMessage, Message>(client, 'messages', this.guildID as string, '', '', Message, ''); 
 		this.created_at = SnowflakeToDate(this.id);
@@ -156,7 +153,6 @@ export default class Channel {
 		const endpoint = ResolveEndpoint(MessageEndpoints.SEND_MESSAGE, { channel: this });
 		const data = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload }) as APIMessage;
 		if (!data) return null;
-		console.log(data);
 		return new Message(this.#client, data);
 	}
 
