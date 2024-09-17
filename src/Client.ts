@@ -50,6 +50,9 @@ export default class Client extends Events {
 	public stickers: ClientCache<APISticker, Sticker>;
 	public messages: ClientCache<APIMessage, Message>;
 
+	public pressence: keyof typeof Pressence = 'ONLINE';
+	public activity: { name: string, type: number, url?: string, state?: string } | null = null;
+
 	// <channelID::messageID, Collector>
 	public collectorLookup: Map<string, Collector> = new Map();
 
@@ -122,40 +125,43 @@ export default class Client extends Events {
 		this.removeAllListeners();
 	}
 
-	async setStatus(status: keyof typeof Pressence) : Promise<void> {
-		status = status.toUpperCase() as keyof typeof Pressence;
-
+	updatePressence() {
 		const payload = {
 			op: OPCodes.PRESENCE_UPDATE,
 			d: {
-				status: Pressence[status],
+				status: Pressence[this.pressence],
 				since: null,
 				afk: false,
-				activities: []
+				activities: this.activity ? [this.activity] : []
 			}
 		}
-		console.log(payload)
+
 		this.wsClient?.WSSendBulk(payload);
 	}
 
-	async setStatusMessage(type: keyof typeof Status, message: string) {
-		const activity = {
+	async setStatus(status: keyof typeof Pressence) : Promise<void> {
+		status = status.toUpperCase() as keyof typeof Pressence;
+		this.pressence = status;
+		this.updatePressence();
+	}
+
+	async setStatusMessage(message: string) {
+		this.activity = {
 			name: 'literally any string lol',
 			state: message,
-			type: Status.Custom
+			type: Status.CUSTOM
 		}
+		this.updatePressence();
+	}
 
-		const payload = {
-			op: OPCodes.PRESENCE_UPDATE,
-			d: {
-				status: Pressence.ONLINE,
-				since: null,
-				afk: false,
-				activities: [activity]
-			}
+	setActivity(type: keyof typeof Status, message: string) {
+		type = type.toUpperCase() as keyof typeof Status;
+		this.activity = {
+			state: '\u200b',
+			name: message,
+			type: Status[type]
 		}
-
-		this.wsClient?.WSSendBulk(payload);
+		this.updatePressence();
 	}
 
 	// client.registerCommands(...commands, 'guildID');
