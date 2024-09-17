@@ -47,7 +47,12 @@ import { APIGuild, APIRole, APIEmoji, APISticker, APIWelcomeScreen, APIChannel }
 import Client from "../Client";
 import SnowflakeToDate from "../Utils/SnowflakeToDate";
 import SlidingCache from "../DataStructures/SlidingCache";
+
 import RoleEndpoints from "../APITypes/Endpoints/Roles";
+import ChannelEndpoints from "../APITypes/Endpoints/Channels";
+import EmojiEndpoints from "../APITypes/Endpoints/Emojis";
+import StickerEndpoints from "../APITypes/Endpoints/Stickers";
+import GuildEndpoints from "../APITypes/Endpoints/Guilds";
 
 import Role from "./Role";
 import Emoji from "./Emoji";
@@ -145,10 +150,10 @@ export default class Guild {
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
 
-		this.channels 	= new SlidingCache<APIChannel, Channel>	(client, 'channels',this.id, RoleEndpoints.GET_CHANNEL, RoleEndpoints.GET_CHANNELS, Channel,'channel');
-		this.roles 		= new SlidingCache<APIRole, Role>		(client, 'roles', 	this.id, RoleEndpoints.GET_ROLE, 	RoleEndpoints.GET_ROLES, 	Role, 	'role');
-		this.emojis 	= new SlidingCache<APIEmoji, Emoji>		(client, 'emojis', 	this.id, RoleEndpoints.GET_EMOJI, 	RoleEndpoints.GET_EMOJIS, 	Emoji,	'emoji');
-		this.stickers 	= new SlidingCache<APISticker, Sticker>	(client, 'stickers',this.id, RoleEndpoints.GET_STICKER, RoleEndpoints.GET_STICKERS, Sticker,'sticker');
+		this.channels 	= new SlidingCache<APIChannel, Channel>	(client, 'channels',this.id, ChannelEndpoints.GET_CHANNEL, 	GuildEndpoints.GET_CHANNELS,	Channel,'channel');
+		this.roles 		= new SlidingCache<APIRole, Role>		(client, 'roles', 	this.id, RoleEndpoints.GET_ROLE, 		RoleEndpoints.GET_ROLES, 		Role, 	'role');
+		this.emojis 	= new SlidingCache<APIEmoji, Emoji>		(client, 'emojis', 	this.id, EmojiEndpoints.GET_EMOJI, 		EmojiEndpoints.GET_EMOJIS,		Emoji,	'emoji');
+		this.stickers 	= new SlidingCache<APISticker, Sticker>	(client, 'stickers',this.id, StickerEndpoints.GET_STICKER,	StickerEndpoints.GET_STICKERS,	Sticker,'sticker');
 
 		this.created_at = SnowflakeToDate(this.id);
 	}
