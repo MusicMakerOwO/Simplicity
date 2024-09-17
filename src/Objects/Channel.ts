@@ -8,7 +8,7 @@ import SnowflakeToDate from '../Utils/SnowflakeToDate';
 import SlidingCache from '../DataStructures/SlidingCache';
 
 import ResolveEndpoint from '../Utils/ResolveEndpoint';
-// import ChannelEndpoints from '../APITypes/Endpoints/Channels';
+import ChannelEndpoints from '../APITypes/Endpoints/Channels';
 import MessageEndpoints from '../APITypes/Endpoints/Messages';
 import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
 
@@ -54,6 +54,8 @@ export default class Channel {
 	public readonly messages: SlidingCache<APIMessage, Message>;
 	public readonly created_at: Date;
 	
+	public currentlyTyping: boolean;
+
 	constructor(client: Client, data: APIChannel) {
 		this.#client = client;
 		this.#client;
@@ -93,6 +95,8 @@ export default class Channel {
 		this.defaultThreadRateLimitPerUser = data.default_thread_rate_limit_per_user ?? null;
 		this.defaultSortOrder = data.default_sort_order ?? null;
 		this.defaultForumLayout = data.default_forum_layout ?? null;
+
+		this.currentlyTyping = false;
 
 		console.log(data);
 
@@ -149,11 +153,23 @@ export default class Channel {
 
 	async send(content: any) : Promise<Message | null> {
 		const payload = ConvertMessagePayload(content);
-		const endpoint = ResolveEndpoint(MessageEndpoints.SEND_MESSAGE, { 'channel': this });
+		const endpoint = ResolveEndpoint(MessageEndpoints.SEND_MESSAGE, { channel: this });
 		const data = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload }) as APIMessage;
 		if (!data) return null;
 		console.log(data);
 		return new Message(this.#client, data);
+	}
+
+	async setTyping(enabled: boolean) {
+		if (this.currentlyTyping === enabled) return;
+		const endpoint = ResolveEndpoint(ChannelEndpoints.TRIGGER_TYPING_INDICATOR, { channel: this });
+		await this.#client.wsClient?.SendRequest('POST', endpoint);
+		setTimeout(() => this.currentlyTyping = false, 10_000);
+	}
+
+	async delete() {
+		const endpoint = ResolveEndpoint(ChannelEndpoints.DELETE_CHANNEL, {channel: this});
+		await this.#client.wsClient?.SendRequest('DELETE', endpoint);
 	}
 
 	toString() {
