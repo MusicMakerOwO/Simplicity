@@ -1,4 +1,4 @@
-const Endpoints: Record<string, string> = {
+export default {
 	GET_ROLES: '/guilds/{guild_id}/roles',
 	GET_ROLE: '/guilds/{guild_id}/roles/{role_id}',
 	CREATE_ROLE: '/guilds/{guild_id}/roles',
@@ -6,5 +6,4 @@ const Endpoints: Record<string, string> = {
 	DELETE_ROLE: '/guilds/{guild_id}/roles/{role_id}',
 	EDIT_ROLE_POSITION: '/guilds/{guild_id}/roles'
 };
-export default Endpoints;
 module.exports = exports.default;

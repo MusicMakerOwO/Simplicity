@@ -1,4 +1,4 @@
-const Endpoints: Record<string, string> = {
+export default{
 	GET_CHANNEL: '/channels/{channel_id}',
 	DELETE_CHANNEL: '/channels/{channel_id}',
 	MODIFY_CHANNEL_PERMISSIONS: '/channels/{channel_id}/permissions/{overwrite_id}',
@@ -23,6 +23,5 @@ const Endpoints: Record<string, string> = {
 	LIST_ARCHIVED_THREADS_PUBLIC: '/channels/{channel_id}/threads/archived/public',
 	LIST_ARCHIVED_THREADS_PRIVATE: '/channels/{channel_id}/threads/archived/private',
 	LIST_JOINED_PRIVATE_ARCHIVED_THREADS: '/channels/{channel_id}/users/@me/threads/archived/private'
-};
-export default Endpoints;
+}
 module.exports = exports.default;

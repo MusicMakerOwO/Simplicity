@@ -1,4 +1,4 @@
-const Endpoints: Record<string, string> = {
+export default {
 	GET_CLIENT_GUILDS: '/users/@me/guilds',
 	GET_CLIENT_MEMBERS: '/users/@me/guilds/{guild_id}/member',
 	LEAVE_GUILD: '/users/@me/guilds/{guild_id}',
@@ -24,5 +24,4 @@ const Endpoints: Record<string, string> = {
 	// More needed
 	// https://discord.com/developers/docs/resources/guild#get-guild
 }
-export default Endpoints;
 module.exports = exports.default;

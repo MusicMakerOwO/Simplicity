@@ -1,5 +1,5 @@
-const Endpoints: Record<string, string> = {
-	LIST_EMOJIS: '/guilds/{guild_id}/emojis',
+export default {
+	GET_EMOJIS: '/guilds/{guild_id}/emojis',
 	GET_EMOJI: '/guilds/{guild_id}/emojis/{emoji_id}',
 	CREATE_EMOJI: '/guilds/{guild_id}/emojis',
 	MODIFY_EMOJI: '/guilds/{guild_id}/emojis/{emoji_id}',
@@ -11,5 +11,4 @@ const Endpoints: Record<string, string> = {
 	MODIFY_BOT_EMOJI: '/applications/{client_id}/emojis/{emoji_id}',
 	DELETE_BOT_EMOJI: '/applications/{client_id}/emojis/{emoji_id}',
 }
-export default Endpoints;
 module.exports = exports.default;
