@@ -97,7 +97,7 @@ export default class Interaction {
 		this.entitlements = data.entitlements;
 		this.authorizing_integration_owners = data.authorizing_integration_owners;
 		this.context = data.context;
-		
+
 		this.customID = this.data.custom_id ?? null;
 
 
@@ -298,6 +298,13 @@ export default class Interaction {
 	}
 
 	createCollector() {
+		if (this.isAutocomplete()) throw new Error('Cannot create a collector for an autocomplete interaction');
+		if (this.isModalSubmit()) throw new Error('Cannot create a collector for a modal submit interaction');
+
+		if (!this.replied) throw new Error('Cannot create a collector before replying to the interaction');
+		if (!this.message) throw new Error('Cannot create a collector before fetching the reply');
+
+		// @ts-ignore
 		return new Collector(this.#client, this);
 	}
 }

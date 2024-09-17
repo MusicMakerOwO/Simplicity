@@ -13,11 +13,11 @@ export default class Collector extends EventEmitter {
 	public readonly interaction: Interaction;
 	public readonly messageID: string | null;
 
-	constructor(client: Client, interaction: Interaction) {
+	constructor(client: Client, interaction: Interaction & { message?: { id: string } }) {
 		super();
 		this.#client = client;
 		this.interaction = interaction;
-		this.messageID = interaction.message?.id ?? null;
+		this.messageID = interaction.message.id;
 
 		this.#client.collectorLookup.set(`${interaction.channel_id}::${this.messageID}`, this);
 
