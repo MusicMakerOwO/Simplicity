@@ -22,7 +22,7 @@ export default class Collector extends EventEmitter {
 		this.#client.collectorLookup.set(`${interaction.channel_id}::${this.messageID}`, this);
 
 		this.resetTimeout();
-		// this.on('collect', this.resetTimeout);
+		this.on('collect', this.resetTimeout);
 	}
 
 	resetTimeout() {
