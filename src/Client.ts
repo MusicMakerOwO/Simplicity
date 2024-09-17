@@ -12,7 +12,7 @@ import ChannelEndpoints from "./APITypes/Endpoints/Channels";
 import RoleEndpoints from "./APITypes/Endpoints/Roles";
 import UserEndpoints from "./APITypes/Endpoints/Users";
 import EmojiEndpoints from "./APITypes/Endpoints/Emojis";
-import StickerEndpoints from "./APITypes/Endpoints/Sticker";
+import StickerEndpoints from "./APITypes/Endpoints/Stickers";
 
 import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker, APIMessage } from "./APITypes/Objects";
 

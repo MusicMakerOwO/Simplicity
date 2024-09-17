@@ -7,8 +7,10 @@ import ChannelTypes from '../Enums/ChannelTypes';
 import SnowflakeToDate from '../Utils/SnowflakeToDate';
 import SlidingCache from '../DataStructures/SlidingCache';
 
-// import Endpoints from '../APITypes/Endpoints/Channels';
-// import ResolveEndpoint from '../Utils/ResolveEndpoint';
+import ResolveEndpoint from '../Utils/ResolveEndpoint';
+// import ChannelEndpoints from '../APITypes/Endpoints/Channels';
+import MessageEndpoints from '../APITypes/Endpoints/Messages';
+import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
 
 export default class Channel {
 	#client: Client;
@@ -92,6 +94,8 @@ export default class Channel {
 		this.defaultSortOrder = data.default_sort_order ?? null;
 		this.defaultForumLayout = data.default_forum_layout ?? null;
 
+		console.log(data);
+
 		this.messages = new SlidingCache<APIMessage, Message>(client, 'messages', this.guildID as string, '', '', Message, ''); 
 		this.created_at = SnowflakeToDate(this.id);
 	}
@@ -141,6 +145,19 @@ export default class Channel {
 
 	isDMBased(): boolean {
 		return Channel.DM_CHANNEL_TYPES.includes(this.type);
+	}
+
+	async send(content: any) : Promise<Message | null> {
+		const payload = ConvertMessagePayload(content);
+		const endpoint = ResolveEndpoint(MessageEndpoints.SEND_MESSAGE, { 'channel': this });
+		const data = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload }) as APIMessage;
+		if (!data) return null;
+		console.log(data);
+		return new Message(this.#client, data);
+	}
+
+	toString() {
+		return `<#${this.id}>`;
 	}
 }
 module.exports = exports.default;
