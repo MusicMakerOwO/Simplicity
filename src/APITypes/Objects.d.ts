@@ -597,6 +597,7 @@ export declare type APIInteractionData = {
 	target_id: string;
 	custom_id: string;
 	values: Array<string>;
+	components: Array<APIActionRow>;
 };
 
 export declare type APIResolvedData = {

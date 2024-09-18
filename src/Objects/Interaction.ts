@@ -19,6 +19,7 @@ import SnowflakeToDate from '../Utils/SnowflakeToDate';
 
 import Collector from './Collector';
 import InteractionOptions from '../Helpers/InteractionOptions';
+import InteractionModal from '../Helpers/InteractionModal';
 
 /*
 export declare type APIInteraction = {
@@ -70,6 +71,7 @@ export default class Interaction {
 	public readonly commandName: string;
 	public readonly values: Array<string> | null;
 	public readonly options: InteractionOptions | null;
+	public readonly fields: InteractionModal | null;
 	
 	public readonly created_at: Date;
 	public message: Message | null;
@@ -106,6 +108,7 @@ export default class Interaction {
 		this.commandName = this.customID;
 		this.values = this.data.values ?? null;
 		this.options = this.data.options ? new InteractionOptions(client, this.guild_id, this.data.options ?? [], this.data.resolved ?? null) : null;
+		this.fields = this.data.components ? new InteractionModal(this.data) : null;
 		this.values = this.data.values ?? null;
 
 		this.replied = false;
