@@ -65,7 +65,8 @@ export default class Interaction {
 	public readonly authorizing_integration_owners: Record<string, string>;
 	public readonly context: APIInteractionContext;
 
-	public readonly customID: string | null;
+	public readonly customID: string;
+	public readonly commandName: string;
 	
 	public readonly created_at: Date;
 	public message: Message | null;
@@ -98,8 +99,8 @@ export default class Interaction {
 		this.authorizing_integration_owners = data.authorizing_integration_owners;
 		this.context = data.context;
 
-		this.customID = this.data.custom_id ?? null;
-
+		this.customID = this.data.custom_id ?? this.data.name ?? null;
+		this.commandName = this.customID;
 
 		this.replied = false;
 		this.deferred = false;
