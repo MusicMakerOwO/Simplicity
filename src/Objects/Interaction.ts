@@ -69,7 +69,7 @@ export default class Interaction {
 	public readonly customID: string;
 	public readonly commandName: string;
 	public readonly values: Array<string> | null;
-	public readonly options: InteractionOptions;
+	public readonly options: InteractionOptions | null;
 	
 	public readonly created_at: Date;
 	public message: Message | null;
@@ -105,7 +105,8 @@ export default class Interaction {
 		this.customID = this.data.custom_id ?? this.data.name ?? null;
 		this.commandName = this.customID;
 		this.values = this.data.values ?? null;
-		this.options = new InteractionOptions(client, this.guild_id, this.data.options ?? [], this.data.resolved ?? null);
+		this.options = this.data.options ? new InteractionOptions(client, this.guild_id, this.data.options ?? [], this.data.resolved ?? null) : null;
+		this.values = this.data.values ?? null;
 
 		this.replied = false;
 		this.deferred = false;
