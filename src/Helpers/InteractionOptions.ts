@@ -2,6 +2,11 @@ import Client from "../Client";
 import { APIInteractionOption, APIResolvedData } from "../APITypes/Objects";
 import CommandOptionTypes from "../Enums/CommandOptionTypes";
 
+import User from "../Objects/User";
+import Member from "../Objects/Member";
+import Channel from "../Objects/Channel";
+import Role from "../Objects/Role";
+
 export default class InteractionOptions {
 	#client: Client;
 	#guildID: string;
@@ -29,13 +34,18 @@ export default class InteractionOptions {
 			this.#client.roles.set(`${guildID}::${role.id}`, role);
 		}
 
+		console.log(resolved);
+
 		this.hoistedOptions = {};
 		
 		this.#parseOptions(options);
+
+		console.log(this.hoistedOptions);
 	}
 
 	#parseOptions(options: Array<APIInteractionOption>) {
 		for (const option of options) {
+			console.log(option);
 			if ('value' in option) {
 				this.hoistedOptions[`${option.type}::${option.name}`] = option.value ?? null;
 			} else {
@@ -48,9 +58,9 @@ export default class InteractionOptions {
 		}
 	}
 
-	getOption<T>(type: number, name?: string) : T | null {
+	getOption(type: number, name?: string) {
 		const key = [type, name].filter(Boolean).join('::');
-		return (this.hoistedOptions[key] as T) ?? null;
+		return this.hoistedOptions[key] ?? null;
 	}
 
 	subcommandGroup() {
@@ -61,48 +71,52 @@ export default class InteractionOptions {
 		return this.getOption(CommandOptionTypes.SUB_COMMAND);
 	}
 
-	getUser(name: string) {
-		const userID = this.getOption<string>(CommandOptionTypes.USER, name);
+	getUser(name: string) : User | null {
+		const userID = this.getOption(CommandOptionTypes.USER, name) as string;
 		if (!userID) return null;
-		return this.#client.users.getSync(userID);
+		return this.#client.users.getSync(userID) ?? null;
 	}
 
-	getMember(name: string) {
-		const memberID = this.getOption<string>(CommandOptionTypes.USER, name);
+	getMember(name: string) : Member | null {
+		const memberID = this.getOption(CommandOptionTypes.USER, name) as string;
 		if (!memberID) return null;
-		return this.#client.members.getSync(`${this.#guildID}::${memberID}`);
+		return this.#client.members.getSync(`${this.#guildID}::${memberID}`) ?? null;
 	}
 
-	getChannel(name: string) {
-		const channelID = this.getOption<string>(CommandOptionTypes.CHANNEL, name);
+	getChannel(name: string) : Channel | null {
+		const channelID = this.getOption(CommandOptionTypes.CHANNEL, name) as string;
 		if (!channelID) return null;
-		return this.#client.channels.getSync(channelID);
+		return this.#client.channels.getSync(channelID) ?? null;
 	}
 
-	getRole(name: string) {
-		const roleID = this.getOption<string>(CommandOptionTypes.ROLE, name);
+	getRole(name: string) : Role | null {
+		const roleID = this.getOption(CommandOptionTypes.ROLE, name) as string;
 		if (!roleID) return null;
-		return this.#client.roles.getSync(`${this.#guildID}::${roleID}`);
+		return this.#client.roles.getSync(`${this.#guildID}::${roleID}`) ?? null;
 	}
 
-	getString(name: string) {
-		return this.getOption(CommandOptionTypes.STRING, name);
+	getString(name: string) : string | null {
+		return this.getOption(CommandOptionTypes.STRING, name) as string;
 	}
 
-	getInteger(name: string) {
-		return this.getOption(CommandOptionTypes.INTEGER, name);
+	getInteger(name: string) : number | null {
+		return this.getOption(CommandOptionTypes.INTEGER, name) as number;
 	}
 
-	getBoolean(name: string) {
-		return this.getOption(CommandOptionTypes.BOOLEAN, name);
+	getBoolean(name: string) : boolean | null {
+		return this.getOption(CommandOptionTypes.BOOLEAN, name) as boolean;
 	}
 
-	getNumber(name: string) {
-		return this.getOption(CommandOptionTypes.NUMBER, name);
+	getNumber(name: string) : number | null {
+		return this.getOption(CommandOptionTypes.NUMBER, name) as number;
 	}
 
-	getMentionable(name: string) {
-		return this.getOption(CommandOptionTypes.MENTIONABLE, name);
+	getMentionable(name: string) : User | Role | null {
+		const ID = this.getOption(CommandOptionTypes.MENTIONABLE, name) as string;
+		if (!ID) return null;
+		if (this.#client.users.cache.has(ID)) return this.#client.users.getSync(ID) as User;
+		if (this.#client.roles.cache.has(`${this.#guildID}::${ID}`)) return this.#client.roles.getSync(`${this.#guildID}::${ID}`) as Role;
+		return null;
 	}
 }
 module.exports = exports.default;

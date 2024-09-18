@@ -429,10 +429,10 @@ export declare type APIRoleSubscriptionData = {
 };
 
 export declare type APIResolvedData = {
-	users: Record<string, APIUser>;
-	members: Record<string, APIMember>;
-	channels: Record<string, APIChannel>;
-	roles: Record<string, APIRole>;
+	users?: Record<string, APIUser>;
+	members?: Record<string, APIMember>;
+	channels?: Record<string, APIChannel>;
+	roles?: Record<string, APIRole>;
 };
 
 export declare type APIPollAnswer = {
