@@ -34,13 +34,9 @@ export default class InteractionOptions {
 			this.#client.roles.set(`${guildID}::${role.id}`, role);
 		}
 
-		console.log(resolved);
-
 		this.hoistedOptions = {};
 		
 		this.#parseOptions(options);
-
-		console.log(this.hoistedOptions);
 	}
 
 	#parseOptions(options: Array<APIInteractionOption>) {
