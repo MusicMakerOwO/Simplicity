@@ -17,32 +17,32 @@ autocomplete? **	boolean	If autocomplete interactions are enabled for this optio
 
 export default class BaseOption {
 	public type: number;
-	public name: string;
-	public description: string;
+	public _name: string;
+	public _description: string;
 	
 	constructor(type: number) {
 		this.type = type;
-		this.name = 'myOption';
-		this.description = '\u200b';
+		this._name = 'myOption';
+		this._description = '\u200b';
 	}
 
-	setName(name: string) {
+	name(name: string) {
 		if (name.length < 1 || name.length > 32) throw new Error('Option name must be between 1 and 32 characters');
-		this.name = String(name);
+		this._name = String(name);
 		return this;
 	}
 
-	setDescription(description: string) {
+	description(description: string) {
 		if (description.length < 1 || description.length > 100) throw new Error('Option description must be between 1 and 100 characters');
-		this.description = String(description);
+		this._description = String(description);
 		return this;
 	}
 
 	toJSON() {
 		return {
 			type: this.type,
-			name: this.name,
-			description: this.description
+			name: this._name,
+			description: this._description
 		};
 	}
 }

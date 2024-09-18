@@ -1,36 +1,34 @@
 import BaseCommand from "./BaseCommand";
 import SubCommand from "./SubCommand";
+import ApplyOptionMethods from "./ApplyOptionMethods";
 
-export default class SubCommandGroup extends BaseCommand {
+class SubCommandGroup extends BaseCommand {
 
-	public subcommands: Array<SubCommand>;
+	public override options: Array<SubCommand>;
 
 	constructor() {
 		super();
 		this.type = 2;
-		this.subcommands = [];
+		this.options = [];
 	}
 
-	addSubCommand(...subcommands: Array<SubCommand>) {
-		if (this.subcommands.length + subcommands.length > 25) throw new Error('Commands can only have up to 25 subcommands');
-		for (const subcommand of subcommands) {
-			if (subcommand.type !== 1) throw new Error('Subcommand Groups may only contain subcommands');
-			if (this.subcommands.some(c => c.name === subcommand.name)) throw new Error(`Subcommand with name ${subcommand.name} already exists`);
-		}
-		this.subcommands.push(...subcommands);
-		return
+	subCommand(fn: (subcommand: SubCommand) => void) {
+		// @ts-ignore
+		return this.addOption(SubCommand, fn);
 	}
 
-	override addOptions(...options: Array<unknown>): this {
-		throw new Error('Subcommand Groups cannot have options, use addSubCommand() instead');
+	subCommandGroup() {
+		throw new Error('Cannot nest subcommand groups, use a subcommand instead');
 	}
 
 	override toJSON() {
 		return {
 			...super.toJSON(),
 			type: this.type,
-			subcommands: this.subcommands.map((c: BaseCommand) => c.toJSON())
+			subcommands: this.options.map((c: BaseCommand) => typeof c.toJSON === 'function' ? c.toJSON() : c)
 		};
 	}
 }
+ApplyOptionMethods.applyOptions(SubCommandGroup, ['addOption']);
+export default SubCommandGroup;
 module.exports = exports.default;

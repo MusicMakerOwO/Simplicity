@@ -1,6 +1,7 @@
 import BaseCommand from "./BaseCommand";
+import ApplyOptionMethods from "./ApplyOptionMethods";
 
-export default class SubCommand extends BaseCommand {
+class SubCommand extends BaseCommand {
 
 	public override options : Array<Object & { type?: number, name: string, description: string }>;
 
@@ -10,16 +11,6 @@ export default class SubCommand extends BaseCommand {
 		this.options = [];
 	}
 
-	override addOptions(...options: Array<Object>): this {
-		if (this.options.length + options.length > 25) throw new Error('Commands can only have up to 25 options');
-		for (const option of options as any[]) {
-			if ('type' in option) throw new Error('Subcommands may only contain options');
-			if (this.options.some(c => c.name === option.name)) throw new Error(`Option with name ${option.name} already exists`);
-		}
-		this.options.push(...options as any[]);
-		return this;
-	}
-
 	override toJSON() {
 		return {
 			...super.toJSON(),
@@ -27,4 +18,6 @@ export default class SubCommand extends BaseCommand {
 		};
 	}
 }
+ApplyOptionMethods.applyOptions(SubCommand);
+export default SubCommand;
 module.exports = exports.default;
