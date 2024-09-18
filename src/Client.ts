@@ -14,7 +14,7 @@ import UserEndpoints from "./APITypes/Endpoints/Users";
 import EmojiEndpoints from "./APITypes/Endpoints/Emojis";
 import StickerEndpoints from "./APITypes/Endpoints/Stickers";
 
-import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker, APIMessage } from "./APITypes/Objects";
+import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker, APIMessage, APIMember } from "./APITypes/Objects";
 
 import User from "./Objects/User";
 import Channel from "./Objects/Channel";
@@ -30,6 +30,7 @@ import CommandEndpoints from "./APITypes/Endpoints/Commands";
 
 import { Status, Pressence } from "./Enums/Status";
 import { OPCodes } from "./APITypes/Enums";
+import Member from "./Objects/Member";
 
 const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_-]{26}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{38})$/;
 
@@ -43,6 +44,7 @@ export default class Client extends Events {
 	public user: User | null = null;
 
 	public guilds: ClientCache<APIGuild, Guild>;
+	public members: ClientCache<APIMember, Member>;
 	public channels: ClientCache<APIChannel, Channel>;
 	public roles: ClientCache<APIRole, Role>;
 	public users: ClientCache<APIUser, User>;
@@ -84,6 +86,7 @@ export default class Client extends Events {
 		this.id = this.#ExtractIDFromToken(this.#token);
 
 		this.guilds 	= new ClientCache(this, 2000, Guild, 	'guild', 	GuildEndpoints.GET_GUILD	);
+		this.members 	= new ClientCache(this, 2000, Member, 	'member', 	GuildEndpoints.GET_MEMBER	);
 		this.channels 	= new ClientCache(this, 2000, Channel, 	'channel', 	ChannelEndpoints.GET_CHANNEL);
 		this.roles 		= new ClientCache(this, 2000, Role, 	'role', 	RoleEndpoints.GET_ROLE		);
 		this.users 		= new ClientCache(this, 2000, User, 	'user', 	UserEndpoints.GET_USER		);
