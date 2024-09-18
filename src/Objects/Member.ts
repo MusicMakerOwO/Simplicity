@@ -1,5 +1,5 @@
 import Client from '../Client';
-import { APIMember } from '../APITypes/Objects';
+import { APIMember, APIUser } from '../APITypes/Objects';
 
 import Guild from './Guild';
 import User from './User';
@@ -16,7 +16,7 @@ export default class Member extends User {
 	public readonly permissions: string;
 	public readonly guild: Guild;
 
-	constructor(client: Client, data: APIMember, guild: Guild) {
+	constructor(client: Client, data: APIMember & { user: APIUser }, guild: Guild) {
 		super(client, data.user);
 
 		this.user = new User(client, data.user);
