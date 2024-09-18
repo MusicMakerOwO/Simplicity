@@ -17,6 +17,11 @@ export default class Modal {
 		return this;
 	}
 
+	setCustomID(custom_id: string): Modal {
+		this.custom_id = String(custom_id);
+		return this;
+	}
+
 	addComponent(component: ModalQuestion): Modal {
 		this.components.push(component);
 		return this;
