@@ -1,36 +1,35 @@
-/*
-title?	string	title of embed
-type?	string	type of embed (always "rich" for webhook embeds)
-description?	string	description of embed
-url?	string	url of embed
-timestamp?	ISO8601 timestamp	timestamp of embed content
-color?	integer	color code of the embed
-footer?	embed footer object	footer information
-image?	embed image object	image information
-thumbnail?	embed thumbnail object	thumbnail information
-video?	embed video object	video information
-provider?	embed provider object	provider information
-author?	embed author object	author information
-fields?	array of embed field objects	fields information, max of 25
-*/
-
 export default class Embed {
-	public title?: string;
-	public type: 'rich';
-	public description?: string;
-	public url?: string;
-	public timestamp?: string;
-	public color?: number;
-	public footer?: { text: string; icon_url?: string; proxy_icon_url?: string };
-	public image?: { url: string; proxy_url?: string; height?: number; width?: number };
-	public thumbnail?: { url: string; proxy_url?: string; height?: number; width?: number };
-	public video?: { url: string; height?: number; width?: number };
-	public provider?: { name: string; url?: string };
-	public author?: { name: string; url?: string; icon_url?: string; proxy_icon_url?: string };
-	public fields?: Array<{ name: string; value: string; inline?: boolean }>;
+	public title: 		string | undefined = undefined;
+	public type: 		'rich';
+	public description: string | undefined = undefined;
+	public url: 		string | undefined = undefined;
+	public timestamp: 	string | undefined = undefined;
+	public color: 		number | undefined = Math.floor( Math.random() * 0xFFFFFF );
+	public footer: 		{ text: string; icon_url?: string; proxy_icon_url?: string } | undefined = undefined;
+	public image: 		{ url: string; proxy_url?: string; height?: number; width?: number } | undefined = undefined;
+	public thumbnail: 	{ url: string; proxy_url?: string; height?: number; width?: number } | undefined = undefined;
+	public video: 		{ url: string; height?: number; width?: number } | undefined = undefined;
+	public provider: 	{ name: string; url?: string } | undefined = undefined;
+	public author: 		{ name: string; url?: string; icon_url?: string; proxy_icon_url?: string } | undefined = undefined;
+	public fields: 		Array<{ name: string; value: string; inline?: boolean }> | undefined = undefined;
 
 	static isValid(embed: any = null) {
-		// coming soon
+		if (!embed) return false;
+		if (typeof embed !== 'object') return false;
+		if (embed.title && typeof embed.title !== 'string') return false;
+		if (embed.type && typeof embed.type !== 'string') return false;
+		if (embed.description && typeof embed.description !== 'string') return false;
+		if (embed.url && typeof embed.url !== 'string') return false;
+		if (embed.timestamp && typeof embed.timestamp !== 'string') return false;
+		if (embed.color && typeof embed.color !== 'number') return false;
+		if (embed.footer && typeof embed.footer !== 'object') return false;
+		if (embed.image && typeof embed.image !== 'object') return false;
+		if (embed.thumbnail && typeof embed.thumbnail !== 'object') return false;
+		if (embed.video && typeof embed.video !== 'object') return false;
+		if (embed.provider && typeof embed.provider !== 'object') return false;
+		if (embed.author && typeof embed.author !== 'object') return false;
+		if (embed.fields && !Array.isArray(embed.fields)) return false;
+		return true;
 	}
 
 	constructor() {
@@ -55,7 +54,7 @@ export default class Embed {
 		return this;
 	}
 
-	setTimestamp(date: Date | string | number) {
+	setTimestamp(date: Date | string | number = Date.now()) {
 		this.timestamp = new Date(date).toISOString();
 		return this;
 	}
