@@ -4,7 +4,7 @@ export declare type APIAvatarDecoration = {
 };
 
 export declare type APIMember = {
-	user: APIUser;
+	user?: APIUser;
 	nick?: string;
 	avatar?: string;
 	roles: string[];
@@ -596,6 +596,7 @@ export declare type APIInteractionData = {
 	guild_id: string;
 	target_id: string;
 	custom_id: string;
+	values: Array<string>;
 };
 
 export declare type APIResolvedData = {

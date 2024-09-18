@@ -1,5 +1,5 @@
 import Client from '../Client';
-import { APIMessage, APIInteraction, APIInteractionData, APIInteractionEntitlement, APIInteractionContext } from '../APITypes/Objects';
+import { APIMember, APIMessage, APIInteraction, APIInteractionData, APIInteractionEntitlement, APIInteractionContext, APIUser } from '../APITypes/Objects';
 import InteractionType from '../Enums/InteractionType';
 
 import Guild from './Guild';
@@ -18,6 +18,7 @@ import Modal from '../Builders/Components/Modal';
 import SnowflakeToDate from '../Utils/SnowflakeToDate';
 
 import Collector from './Collector';
+import InteractionOptions from '../Helpers/InteractionOptions';
 
 /*
 export declare type APIInteraction = {
@@ -67,6 +68,8 @@ export default class Interaction {
 
 	public readonly customID: string;
 	public readonly commandName: string;
+	public readonly values: Array<string> | null;
+	public readonly options: InteractionOptions;
 	
 	public readonly created_at: Date;
 	public message: Message | null;
@@ -87,7 +90,7 @@ export default class Interaction {
 		this.guild_id = data.guild_id;
 		this.channel = data.channel ? new Channel(client, data.channel) : null;
 		this.channel_id = data.channel_id;
-		this.member = (data.member && this.guild) ? new Member(client, data.member, this.guild) : null;
+		this.member = (data.member && this.guild) ? new Member(client, data.member as APIMember & { user: APIUser }, this.guild) : null;
 		this.user = data.user ? new User(client, data.user) : null;
 		this.token = data.token;
 		this.version = data.version;
@@ -101,6 +104,8 @@ export default class Interaction {
 
 		this.customID = this.data.custom_id ?? this.data.name ?? null;
 		this.commandName = this.customID;
+		this.values = this.data.values ?? null;
+		this.options = new InteractionOptions(client, this.guild_id, this.data.options ?? [], this.data.resolved ?? null);
 
 		this.replied = false;
 		this.deferred = false;
