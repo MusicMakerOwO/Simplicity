@@ -5,16 +5,15 @@ export default class PremiumButton {
 
 	public type: ComponentTypes.BUTTON;
 	public style: ButtonStyles.PREMIUM;
-	public sku_id: string;
+	public sku_id: string = '';
 
 	/*
 	Premium buttons must contain a sku_id, and cannot have a custom_id, label, url, or emoji.
 	*/
 
-	constructor(sku_id: string) {
+	constructor() {
 		this.type = 2;
 		this.style = 6;
-		this.sku_id = sku_id;
 	}
 
 	setSKU(sku_id: string) {
@@ -24,6 +23,7 @@ export default class PremiumButton {
 	}
 
 	toJSON() {
+		if (!this.sku_id) throw new Error('Premium buttons must contain a sku_id, use setSKU() to add one');
 		return {
 			type: this.type,
 			style: this.style,

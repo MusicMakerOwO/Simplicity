@@ -15,7 +15,7 @@ export default class Button {
 	public url?: string;
 	public emoji?: { id: string, name: string, animated: boolean };
 
-	constructor(button: unknown) {
+	constructor() {
 		this.type = ComponentTypes.BUTTON;
 		this.label = '\u200b';
 		this.style = 2;
