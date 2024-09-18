@@ -1,5 +1,19 @@
 import BaseCommand from './BaseCommand';
 
+import StringOption from '../CommandOptions/StringOption';
+import ChannelOption from '../CommandOptions/ChannelOption';
+import UserOption from '../CommandOptions/UserOption';
+import NumberOption from '../CommandOptions/NumberOption';
+import RoleOption from '../CommandOptions/RoleOption';
+import IntegerOption from '../CommandOptions/IntegerOption';
+import BooleanOption from '../CommandOptions/BooleanOption';
+import AttachmentOption from '../CommandOptions/AttachmentOption';
+import MentionableOption from '../CommandOptions/MetionableOption';
+
+// .stringOption( x => x.name('name').description('The name of the user').required(true) )
+
+declare type ClassObject<T> = new (...args: unknown[]) => T;
+
 export default class SlashCommand extends BaseCommand {
 
 	public default_permission: number;
@@ -13,6 +27,50 @@ export default class SlashCommand extends BaseCommand {
 		this.dm_permission = false;
 		this.description_localizations = {};
 		this.nsfw = false;
+	}
+
+	addOption<T extends { toJSON: () => Object}>(constructor: ClassObject<T>, fn: (x: T) => T) : this {
+		const option = fn( new constructor() );
+		const object = typeof option.toJSON === 'function' ? option.toJSON() : option;
+		if (!this.options) this.options = []; 
+		this.options.push(object);
+		return this;
+	}
+
+	stringOption(fn: (x: StringOption) => StringOption) {
+		return this.addOption(StringOption, fn);
+	}
+
+	roleOption(fn: (x: RoleOption) => RoleOption) {
+		return this.addOption(RoleOption, fn)
+	}
+
+	integerOption(fn: (x: IntegerOption) => IntegerOption) {
+		return this.addOption(IntegerOption, fn)
+	}
+
+	channelOption(fn: (x: ChannelOption) => ChannelOption) {
+		return this.addOption(ChannelOption, fn)
+	}
+
+	attachmentOption(fn: (x: AttachmentOption) => AttachmentOption) {
+		return this.addOption(AttachmentOption, fn)
+	}
+
+	userOption(fn: (x: UserOption) => UserOption) {
+		return this.addOption(UserOption, fn)
+	}
+	
+	numberOption(fn: (x: NumberOption) => NumberOption) {
+		return this.addOption(NumberOption, fn);
+	}
+
+	booleanOption(fn: (x: BooleanOption) => BooleanOption) {
+		return this.addOption(BooleanOption, fn);
+	}
+
+	mentionableOption(fn: (x: MentionableOption) => MentionableOption) {
+		return this.addOption(MentionableOption, fn);
 	}
 
 	setDefaultPermission(...permissions: number[]) {
