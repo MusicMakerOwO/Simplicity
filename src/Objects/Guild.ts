@@ -136,6 +136,14 @@ export default class Guild {
 		this.created_at = SnowflakeToDate(this.id);
 	}
 
+	static equals (guild1: Object & { id: string }, guild2: Object & { id: string }) {
+		return guild1.id === guild2.id;
+	}
+
+	equals (guild: Object & { id: string }) {
+		return Guild.equals(this, guild);
+	}
+
 	get iconURL() {
 		return this.icon ? `https://cdn.discordapp.com/icons/${this.id}/${this.icon}.webp` : null;
 	}

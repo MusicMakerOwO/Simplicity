@@ -128,6 +128,14 @@ export default class Channel {
 		ChannelTypes.GROUP_DM
 	];
 
+	static equals(channel1: Object & { id: string }, channel2: Object & { id: string }) {
+		return channel1.id === channel2.id;
+	}
+
+	equals(channel: Object & { id: string }) {
+		return Channel.equals(this, channel);
+	}
+
 	isTextBased(): boolean {
 		return Channel.TEXT_CHANNEL_TYPES.includes(this.type);
 	}

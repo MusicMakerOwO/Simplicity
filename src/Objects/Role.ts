@@ -35,5 +35,13 @@ export default class Role {
 
 		this.created_at = SnowflakeToDate(this.id);
 	}
+
+	static equals(role1: Object & { id: string }, role2: Object & { id: string }) {
+		return role1.id === role2.id;
+	}
+
+	equals(role: Object & { id: string }) {
+		return Role.equals(this, role);
+	}
 }
 module.exports = exports.default;

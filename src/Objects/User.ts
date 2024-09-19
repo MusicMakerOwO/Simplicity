@@ -82,6 +82,14 @@ export default class User {
 			: Number(this.discriminator) % 5;
 	}
 
+	static equals(user1: Object & { id: string }, user2: Object & { id: string }): boolean {
+		return user1.id === user2.id;
+	}
+
+	equals(user: Object & { id: string }): boolean {
+		return User.equals(this, user);
+	}
+
 	get tag(): string {
 		return `${this.username}#${this.discriminator}`;
 	}

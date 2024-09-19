@@ -148,6 +148,14 @@ export default class Message {
 		this.created_at = SnowflakeToDate(this.id);
 	}
 
+	static equals (message1: Object & { id: string }, message2: Object & { id: string }) {
+		return message1.id === message2.id;
+	}
+
+	equals (message: Object & { id: string }) {
+		return Message.equals(this, message);
+	}
+
 	get guild() {
 		return this.#client.guilds.getSync(this.guild_id as string) ?? null;
 	}
