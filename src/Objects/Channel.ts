@@ -1,5 +1,5 @@
 import Client from '../Client';
-import { APIChannel, APIDefaultReaction, APIForumTag, APIMessage, APIPermissionOverwrite, APIThreadMember, APIThreadMetadata, APIUser } from '../APITypes/Objects';
+import { APIChannel, APIDefaultReaction, APIForumTag, APIInvite, APIMessage, APIPermissionOverwrite, APIThreadMember, APIThreadMetadata, APIUser } from '../APITypes/Objects';
 import Message from './Message';
 import BitField from '../DataStructures/BitField';
 import ChannelFlags from '../Enums/ChannelFlags';
@@ -11,6 +11,8 @@ import ResolveEndpoint from '../Utils/ResolveEndpoint';
 import ChannelEndpoints from '../APITypes/Endpoints/Channels';
 import MessageEndpoints from '../APITypes/Endpoints/Messages';
 import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
+
+import Invite from './Invite';
 
 export default class Channel {
 	#client: Client;
@@ -178,6 +180,19 @@ export default class Channel {
 
 	toString() {
 		return `<#${this.id}>`;
+	}
+
+	// createInvite({ maxUses, duration, temporary })
+	async createInvite(data: { maxUses?: number, duration?: number, temporary?: boolean }) : Promise<Invite> {
+		if (typeof data !== 'object' || data === null) data = {};
+		const { maxUses, duration, temporary } = data;
+		if (maxUses && (typeof maxUses !== 'number' || maxUses < 1 || maxUses > 100)) throw new TypeError('maxUses must be a number between 1 and 100');
+		if (duration && (typeof duration !== 'number' || duration < 0 || duration > 604800)) throw new TypeError('duration must be a number between 0 and 604800 (1 week : 1000 * 60 * 60 * 24 * 7)');
+		if (temporary && typeof temporary !== 'boolean') throw new TypeError('temporary must be a boolean');
+
+		const endpoint = ResolveEndpoint(ChannelEndpoints.CREATE_CHANNEL_INVITE, { channel: this });
+		const inviteData = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: data }) as APIInvite;
+		return new Invite(this.#client, inviteData);
 	}
 }
 module.exports = exports.default;
