@@ -629,3 +629,18 @@ export declare type APIInteractionEntitlement = {
 	guild_id?: string;
 	consumed?: boolean;
 };
+
+export declare type APIInvite = {
+	channel_id: string;
+	code: string;
+	created_at: string;
+	guild_id?: string;
+	inviter?: APIUser;
+	max_age: number;
+	max_uses: number;
+	target_type?: number;
+	target_user?: APIUser;
+	target_application?: any;
+	temporary: boolean;
+	uses: number;
+}
