@@ -185,5 +185,10 @@ export default class Guild {
 		const response = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: data }) as APIChannel;
 		return new Channel(this.#client, response)
 	}
+
+	async leave() {
+		const endpoint = ResolveEndpoint(GuildEndpoints.LEAVE_GUILD, { guild: this })
+		await this.#client.wsClient?.SendRequest('DELETE', endpoint)
+	}
 }
 module.exports = exports.default;
