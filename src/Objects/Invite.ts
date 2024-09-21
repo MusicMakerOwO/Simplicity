@@ -22,7 +22,7 @@ export declare type APIInvite = {
 
 export default class Invite {
 	#client: Client;
-
+	
 	public readonly code: string;
 	public readonly channelID: string;
 	public readonly guildID: string | null;
@@ -39,6 +39,7 @@ export default class Invite {
 
 	constructor(client: Client, data: APIInvite) {
 		this.#client = client;
+		this.#client;
 
 		this.code = data.code;
 		this.channelID = data.channel_id;
