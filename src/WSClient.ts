@@ -30,6 +30,8 @@ export default class WSClient {
 		this.#client = client;
 		this.heartbeat_interval = 0;
 		this.internalEvents = new EventDispatcher(client);
+
+		process.on('SIGINT', this.close.bind(this));
 	}
 	
 	#GenerateHeaders() {
@@ -102,9 +104,11 @@ export default class WSClient {
 			this.#client.emit('events', `Received ${OPCodes[data.op]} event`);
 
 			if (data.op === OPCodes.HELLO) {
+				data = data as HelloEvent;
 				ws.send({
 					op: OPCodes.IDENTIFY,
 					d: {
+						max_dave_protocol_version: 1,
 						token: `Bot ${this.#token}`,
 						intents: Number(this.#client.intents),
 						properties: {
@@ -120,6 +124,8 @@ export default class WSClient {
 				this.#client.connected_at = new Date();
 			}
 
+			data = data as GatewayPayload;
+
 			if (data.op === OPCodes.HEARTBEAT) {
 				this.shard_seq[shardID] = data.d;
 				this.sendHeartbeat(shardID);
@@ -132,6 +138,7 @@ export default class WSClient {
 	}
 
 	close() {
+		console.log('Closing all shards');
 		this.#client.connected_at = null;
 		this.#client.emit('events', 'Closing all shards');
 		for (const shard of Object.values(this.shards)) {

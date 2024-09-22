@@ -70,3 +70,4 @@ export default class Invite {
 		return `<Invite ${this.code}>`;
 	}
 }
+module.exports = exports.default;
