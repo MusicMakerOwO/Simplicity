@@ -79,7 +79,26 @@ export default class WSClient {
 		for (let i = 0; i < this.shards.length; i++) {
 			this.WSSend(i, payload);
 		}
-	} 
+	}
+
+	RandomShardID() {
+		return Math.floor(Math.random() * this.shards.length);
+	}
+
+	async WaitForPayload(shardID: number, opCode: OPCodes) : Promise<GatewayPayload> {
+		const ws = this.shards[shardID];
+		if (!ws) throw new Error(`Shard ${shardID} is not connected`);
+
+		return new Promise((resolve, reject) => {
+			const handler = (data: GatewayPayload) => {
+				if (data.op === opCode) {
+					ws.off('message', handler);
+					resolve(data);
+				}
+			};
+			ws.on('message', handler);
+		});
+	}
 
 	WSConnect(shardID: number = 0, shard_count: number = 1) {
 		const ws = new Websocket('wss://gateway.discord.gg/?v=9&encoding=json');
