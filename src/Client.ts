@@ -1,6 +1,7 @@
 import HTTPS from "node:https";
 
 import WSClient from "./WSClient";
+import VCClient from "./VCClient";
 import Events from "./Events";
 import ResolveIntents from "./Utils/ResolveIntents";
 import ClientCache from "./DataStructures/ClientCache";
@@ -36,7 +37,8 @@ const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_-]{26}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_
 
 export default class Client extends Events {
 	#token: string;
-	public wsClient: WSClient | null;
+	public wsClient: WSClient;
+	public vcClient: VCClient;
 	public intents: bigint;
 	public connected_at: Date | null = null; // set in.wsClientClient
 	public readonly id: string;
@@ -83,6 +85,7 @@ export default class Client extends Events {
 		this.#token = foundToken ? foundToken[1] : '';
 		this.intents = ResolveIntents(options.intents);
 		this.wsClient = new WSClient(this);
+		this.vcClient = new VCClient(this);
 		this.id = this.#ExtractIDFromToken(this.#token);
 
 		this.guilds 	= new ClientCache(this, 2000, Guild, 	'guild', 	GuildEndpoints.GET_GUILD	);
@@ -116,8 +119,7 @@ export default class Client extends Events {
 	disconnect = this.destroy;
 	close = this.destroy;
 	destroy() {
-		this.wsClient?.close();
-		this.wsClient = null;
+		this.wsClient.close();
 		this.#token = '';
 		this.user = null;
 		this.guilds.clear();
