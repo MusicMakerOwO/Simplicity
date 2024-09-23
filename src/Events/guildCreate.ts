@@ -3,25 +3,29 @@ import { APIGuild } from '../APITypes/Objects';
 import { APIEvents } from '../APITypes/Enums';
 import Guild from '../Objects/Guild';
 
+function addGuildID<T extends Object>(obj: T, guildID: string) : T & { guild_id: string } {
+	return Object.assign(obj, { guild_id: guildID });
+}
+
 export default {
 	name: APIEvents.GUILD_CREATE,
 	execute: function(client: Client, data: APIGuild) {
 		client.guilds.set(data.id, data);
 
 		for (const channel of data.channels) {
-			client.channels.set(channel.id, channel);
+			client.channels.set(channel.id, addGuildID(channel, data.id));
 		}
 
 		for (const role of data.roles) {
-			client.roles.set(role.id, role);
+			client.roles.set(role.id, addGuildID(role, data.id));
 		}
 
 		for (const emoji of data.emojis) {
-			client.emojis.set(emoji.id, emoji);
+			client.emojis.set(emoji.id, addGuildID(emoji, data.id));
 		}
 
 		for (const sticker of data.stickers ?? []) {
-			client.stickers.set(sticker.id, sticker);
+			client.stickers.set(sticker.id, addGuildID(sticker, data.id));
 		}
 
 		const guild = new Guild(client, data);
