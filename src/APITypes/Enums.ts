@@ -1,5 +1,5 @@
 // https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-opcodes
-export enum OPCodes {
+export enum GatewayOPCodes {
 	DISPATCH = 0,
 	HEARTBEAT = 1,
 	IDENTIFY = 2,
@@ -11,6 +11,33 @@ export enum OPCodes {
 	INVALID_SESSION = 9,
 	HELLO = 10,
 	HEARTBEAT_ACK = 11
+}
+
+// https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice
+export enum VoiceOPCodes {
+	IDENTIFY = 0,
+	SELECT_PROTOCOL = 1,
+	READY = 2,
+	HEARTBEAT = 3,
+	SESSION_DESCRIPTION = 4,
+	SPEAKING = 5,
+	HEARTBEAT_ACK = 6,
+	RESUME = 7,
+	HELLO = 8,
+	RESUMED = 9,
+	CLIENTS_CONNECT = 11,
+	CLIENT_DISCONNECT = 13,
+	DAVE_PREPARE_TRANSITION = 21,
+	DAVE_EXECUTE_TRANSITION = 22,
+	DAVE_TRANSITION_READY = 23,
+	DAVE_PREPARE_EPOCH = 24,
+	DAVE_MLS_EXTERNAL_SENDER = 25,
+	DAVE_MLS_KEY_PACKAGE = 26,
+	DAVE_MLS_PROPOSALS = 27,
+	DAVE_MLS_COMMIT_WELCOME = 28,
+	DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION = 29,
+	DAVE_MLS_WELCOME = 30,
+	DAVE_MLS_INVALID_COMMIT_WELCOME = 31
 }
 
 

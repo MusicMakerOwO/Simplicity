@@ -30,7 +30,7 @@ import ResolveEndpoint from "./Utils/ResolveEndpoint";
 import CommandEndpoints from "./APITypes/Endpoints/Commands";
 
 import { Status, Pressence } from "./Enums/Status";
-import { OPCodes } from "./APITypes/Enums";
+import { GatewayOPCodes } from "./APITypes/Enums";
 import Member from "./Objects/Member";
 
 const TOKEN_REGEX = /^(?:Bot )?([A-Za-z0-9_-]{26}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{38})$/;
@@ -132,7 +132,7 @@ export default class Client extends Events {
 
 	updatePressence() {
 		const payload = {
-			op: OPCodes.PRESENCE_UPDATE,
+			op: GatewayOPCodes.PRESENCE_UPDATE,
 			d: {
 				status: Pressence[this.pressence],
 				since: null,

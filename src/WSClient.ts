@@ -1,5 +1,5 @@
 import { GatewayPayload, HelloEvent } from "./APITypes/GatewayTypes";
-import { OPCodes } from "./APITypes/Enums";
+import { GatewayOPCodes } from "./APITypes/Enums";
 import Websocket from "./Websocket";
 import Client from "./Client";
 import EventDispatcher from "./EventDispatcher";
@@ -44,7 +44,7 @@ export default class WSClient {
 
 	sendHeartbeat(shardID: number) {
 		this.shards[shardID].send({
-			op: OPCodes.HEARTBEAT,
+			op: GatewayOPCodes.HEARTBEAT,
 			d: this.shard_seq[shardID] ?? null
 		});
 		this.#client.emit('events', `Sent heartbeat to shard ${shardID + 1}`);
@@ -85,7 +85,7 @@ export default class WSClient {
 		return Math.floor(Math.random() * this.shards.length);
 	}
 
-	async WaitForPayload(shardID: number, opCode: OPCodes) : Promise<GatewayPayload> {
+	async WaitForPayload(shardID: number, opCode: GatewayOPCodes) : Promise<GatewayPayload> {
 		const ws = this.shards[shardID];
 		if (!ws) throw new Error(`Shard ${shardID} is not connected`);
 
@@ -120,12 +120,12 @@ export default class WSClient {
 		ws.on('error', CloseWS);
 
 		ws.on('message', (data: HelloEvent | GatewayPayload) => {
-			this.#client.emit('events', `Received ${OPCodes[data.op]} event`);
+			this.#client.emit('events', `Received ${GatewayOPCodes[data.op]} event`);
 
-			if (data.op === OPCodes.HELLO) {
+			if (data.op === GatewayOPCodes.HELLO) {
 				data = data as HelloEvent;
 				ws.send({
-					op: OPCodes.IDENTIFY,
+					op: GatewayOPCodes.IDENTIFY,
 					d: {
 						max_dave_protocol_version: 1,
 						token: `Bot ${this.#token}`,
@@ -145,12 +145,12 @@ export default class WSClient {
 
 			data = data as GatewayPayload;
 
-			if (data.op === OPCodes.HEARTBEAT) {
+			if (data.op === GatewayOPCodes.HEARTBEAT) {
 				this.shard_seq[shardID] = data.d;
 				this.sendHeartbeat(shardID);
 			}
 
-			if (data.op === OPCodes.DISPATCH) {
+			if (data.op === GatewayOPCodes.DISPATCH) {
 				this.internalEvents.dispatch(data.t, data.d);
 			}
 		});
