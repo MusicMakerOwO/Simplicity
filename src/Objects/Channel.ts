@@ -194,5 +194,11 @@ export default class Channel {
 		const inviteData = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: data }) as APIInvite;
 		return new Invite(this.#client, inviteData);
 	}
+
+	async connect() {
+		if (!this.#client.vcClient) throw new Error('Voice client is not enabled');
+		if (!Channel.VOICE_CHANNEL_TYPES.includes(this.type)) throw new Error('Cannot connect to a non-voice channel');
+		return await this.#client.vcClient.addConnection(this.guildID as string, this.id);
+	}
 }
 module.exports = exports.default;
