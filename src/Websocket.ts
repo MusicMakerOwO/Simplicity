@@ -6,8 +6,13 @@ export default class WSClient extends Events {
 
 	#WSCallback(event: string) : (data: (CloseEvent | MessageEvent | Event) & { data?: string }) => void {
 		return (data) => {
-			const parsed = JSON.parse(data.data ?? '{}');
-			this.emit(event, parsed);
+			if (!('data' in data)) return;
+			try {
+				const parsed = JSON.parse(data.data ?? '{}');
+				this.emit(event, parsed);
+			} catch (e) {
+				this.emit(event, data);
+			}
 		};
 	}
 	
