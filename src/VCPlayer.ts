@@ -18,13 +18,13 @@ const VOICE_PACKET_HEADER = Buffer.from([0x80, 0x78, 0x00, 0x00, 0x00, 0x00, 0x0
 function ConvertUDPPayload(data: Buffer) {
 
 	const initialValue = data.readUIntBE(0, 2);
-	if (initialValue === 0x00 || initialValue === 0x01) {
+	if (initialValue === 0x01 || initialValue === 0x02) {
 		// IP discovery packet
 		const response = data.readUIntBE(0, 2) === 0x00 ? 'request' : 'response';
 		const length = data.readUIntBE(2, 2);
 		const ssrc = data.readUIntBE(4, 4); // 32-bit integer unisgned
 		const ip = data.toString('utf8', 8, 8 + length).split('\0')[0]; // null terminated string
-		const port = data.readUIntBE(8 + length, 2);
+		const port = data.readUIntBE(length - 2, 2); // 16-bit integer unsigned
 		return {
 			type: 'IP_DISCOVERY',
 			response,
@@ -112,6 +112,7 @@ export default class VCPlayer {
 		this.#udp.send(IP_DISCOVERY_PACKET);
 		this.#udp.on('message', (data: Buffer) => {
 			const packet = ConvertUDPPayload(data);
+			console.log(packet);
 			switch (packet.type) {
 				case 'IP_DISCOVERY':
 					this.#localIP = packet.ip as string;
@@ -140,7 +141,7 @@ export default class VCPlayer {
 
 	async connect(endpoint: string, token: string) {
 		// todo: https://discord.com/developers/docs/topics/voice-connections#connecting-to-voice
-		this.#ws = new Websocket(`wss://${endpoint}/?v=4`);
+		this.#ws = new Websocket(`wss://${endpoint}/?v=8`);
 
 		this.#ws.on('send', console.log.bind(null, 'sent data :'));
 		this.#ws.on('error', console.error.bind(null, 'error :'));
@@ -189,7 +190,6 @@ export default class VCPlayer {
 				self_deaf: false
 			}
 		});
-		this.destroy();
 	}
 
 	async destroy() {
