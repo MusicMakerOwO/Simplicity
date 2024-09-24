@@ -37,6 +37,7 @@ export default class VCClient {
 			}
 		});
 		for (const player of this.connections.values()) {
+			player.disconnect();
 			player.destroy();
 		}
 	}
