@@ -15,6 +15,53 @@ for (let i = IP_DISCOVERY_PACKET.length; i < 74; i++) {
 	IP_DISCOVERY_PACKET.writeUInt8(0);
 }
 
+const VOICE_PACKET_HEADER = Buffer.from([0x80, 0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+
+function ConvertUDPPayload(data: Buffer) {
+
+	const initialValue = data.readUIntBE(0, 2);
+	if (initialValue === 0x00 || initialValue === 0x01) {
+		// IP discovery packet
+		const response = data.readUIntBE(0, 2) === 0x00 ? 'request' : 'response';
+		const length = data.readUIntBE(2, 2);
+		const ssrc = data.readUIntBE(4, 4); // 32-bit integer unisgned
+		const ip = data.toString('utf8', 8, 8 + length).split('\0')[0]; // null terminated string
+		const port = data.readUIntBE(8 + length, 2);
+		return {
+			type: 'IP_DISCOVERY',
+			response,
+			length,
+			ssrc,
+			ip,
+			port
+		}
+	}
+
+	if (initialValue === VOICE_PACKET_HEADER.readUIntBE(0, 2)) {
+		const version = data.readUIntBE(0, 1); // 0x80
+		const payloadType = data.readUIntBE(1, 1); // 0x78
+		const sequence = data.readUIntBE(2, 2); // 16-bit integer unsigned
+		const timestamp = data.readUIntBE(4, 4); // 32-bit integer unsigned
+		const ssrc = data.readUIntBE(8, 4);
+		const payload = data.subarray(12, data.length);
+		return {
+			type: 'VOICE_PACKET',
+			version,
+			payloadType,
+			sequence,
+			timestamp,
+			ssrc,
+			payload // encrypted data, decrypted in the code
+		}
+	}
+
+	return {
+		type: 'UNKNOWN',
+		data
+	}
+
+}
+
 export default class VCPlayer {
 	#client: Client;
 	#ws: Websocket | null = null;
@@ -61,6 +108,38 @@ export default class VCPlayer {
 		console.log('Sent heartbeat');
 	}
 
+	#connectUDP() {
+		this.#udp = new UDP(this.port, this.ip);
+
+		this.#udp.send(IP_DISCOVERY_PACKET);
+		this.#udp.on('message', (data: Buffer) => {
+			const packet = ConvertUDPPayload(data);
+			switch (packet.type) {
+				case 'IP_DISCOVERY':
+					this.#localIP = packet.ip as string;
+					this.#ws?.send({
+						op: VoiceOPCodes.SELECT_PROTOCOL,
+						d: {
+							protocol: 'udp',
+							data: {
+								address: this.#localIP,
+								port: this.port,
+								mode: this.modes[0]
+							}
+						}
+					});
+					break;
+				case 'VOICE_PACKET':
+					// coming soon
+					break;
+				case 'UNKNOWN':
+					console.error('Unknown packet received');
+					console.error(packet.data);
+					break;
+			}
+		});
+	}
+
 	async connect(endpoint: string, token: string) {
 		// todo: https://discord.com/developers/docs/topics/voice-connections#connecting-to-voice
 		this.#ws = new Websocket(`wss://${endpoint}/?v=4`);
@@ -88,28 +167,13 @@ export default class VCPlayer {
 
 			if (data.op === VoiceOPCodes.READY) {
 				data = data as GatewayPayload;
+				
 				this.ssrc = data.d.ssrc;
 				this.ip = data.d.ip;
 				this.port = data.d.port;
 				this.modes = data.d.modes;
 
-				this.#udp = new UDP(this.port, this.ip);
-
-				this.#udp.send(IP_DISCOVERY_PACKET);
-				this.#udp.once('message', (packet: Buffer) => {
-					this.#localIP = (packet.toString().match(IP_REGEX) as RegExpMatchArray)[0];
-					this.#ws?.send({
-						op: VoiceOPCodes.SELECT_PROTOCOL,
-						d: {
-							protocol: 'udp',
-							data: {
-								address: this.#localIP,
-								port: this.port,
-								mode: this.modes[0]
-							}
-						}
-					});
-				});
+				this.#connectUDP();
 			}
 
 			console.log(`Received ${data.op} : ${VoiceOPCodes[data.op]} event`);
