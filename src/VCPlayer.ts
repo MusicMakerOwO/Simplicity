@@ -4,8 +4,6 @@ import UDP from "./UDP";
 import { GatewayOPCodes, VoiceOPCodes } from "./APITypes/Enums";
 import { GatewayPayload, HelloEvent } from "./APITypes/GatewayTypes";
 
-const IP_REGEX = /\d+\.\d+\.\d+\.\d+/;
-
 const IP_DISCOVERY_PACKET = Buffer.alloc(74);
 IP_DISCOVERY_PACKET.writeUInt8(0x00, 0);
 IP_DISCOVERY_PACKET.writeUInt8(0x01, 1);
