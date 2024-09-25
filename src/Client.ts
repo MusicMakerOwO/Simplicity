@@ -14,8 +14,9 @@ import RoleEndpoints from "./APITypes/Endpoints/Roles";
 import UserEndpoints from "./APITypes/Endpoints/Users";
 import EmojiEndpoints from "./APITypes/Endpoints/Emojis";
 import StickerEndpoints from "./APITypes/Endpoints/Stickers";
+import InviteEndpoints from "./APITypes/Endpoints/Invites";
 
-import { APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker, APIMessage, APIMember } from "./APITypes/Objects";
+import { APIInvite, APIGuild, APIChannel, APIRole, APIUser, APIEmoji, APISticker, APIMessage, APIMember } from "./APITypes/Objects";
 
 import User from "./Objects/User";
 import Channel from "./Objects/Channel";
@@ -24,6 +25,7 @@ import Role from "./Objects/Role";
 import Emoji from "./Objects/Emoji";
 import Sticker from "./Objects/Sticker";
 import Message from "./Objects/Message";
+import Invite from "./Objects/Invite";
 
 import Range from "./Utils/Range";
 import ResolveEndpoint from "./Utils/ResolveEndpoint";
@@ -53,6 +55,7 @@ export default class Client extends Events {
 	public emojis: ClientCache<APIEmoji, Emoji>;
 	public stickers: ClientCache<APISticker, Sticker>;
 	public messages: ClientCache<APIMessage, Message>;
+	public invites: ClientCache<APIInvite, Invite>;
 
 	public pressence: keyof typeof Pressence = 'ONLINE';
 	public activity: { name: string, type: number, url?: string, state?: string } | null = null;
@@ -96,6 +99,7 @@ export default class Client extends Events {
 		this.emojis 	= new ClientCache(this, 2000, Emoji, 	'emoji', 	EmojiEndpoints.GET_EMOJI	);
 		this.stickers 	= new ClientCache(this, 2000, Sticker, 	'sticker',	StickerEndpoints.GET_STICKER);
 		this.messages 	= new ClientCache(this,10000, Message,  'message', 	''							);
+		this.invites 	= new ClientCache(this, 2000, Invite, 	'invite', 	InviteEndpoints.GET_INVITE	);
 	}
 
 	#ExtractIDFromToken(token: string): string {
