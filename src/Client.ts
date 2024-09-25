@@ -43,7 +43,7 @@ export default class Client extends Events {
 	public vcClient: VCClient;
 	public intents: bigint;
 	public connected_at: Date | null = null; // set in.wsClientClient
-	public readonly id: string;
+	public id: string;
 
 	public user: User | null = null;
 
@@ -117,6 +117,9 @@ export default class Client extends Events {
 	connect(token?: string) {
 		if (token) this.#token = token;
 		if (!this.#token) throw new Error('No token provided, add it to the client constructor or pass it into this function');
+
+		this.id = this.#ExtractIDFromToken(this.#token);
+
 		this.wsClient?.connect(this.#token);
 	}
 
