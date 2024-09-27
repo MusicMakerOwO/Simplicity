@@ -6,11 +6,12 @@ import ChannelFlags from '../Enums/ChannelFlags';
 import ChannelTypes from '../Enums/ChannelTypes';
 import SnowflakeToDate from '../Utils/SnowflakeToDate';
 import SlidingCache from '../DataStructures/SlidingCache';
+import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
 
 import ResolveEndpoint from '../Utils/ResolveEndpoint';
 import ChannelEndpoints from '../APITypes/Endpoints/Channels';
 import MessageEndpoints from '../APITypes/Endpoints/Messages';
-import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
+import GuildEndpoints from '../APITypes/Endpoints/Guilds';
 
 import Invite from './Invite';
 
@@ -156,6 +157,18 @@ export default class Channel {
 
 	isDMBased(): boolean {
 		return Channel.DM_CHANNEL_TYPES.includes(this.type);
+	}
+
+	async clone(name: string = this.name as string) {
+		const guild = await this.#client.guilds.get(this.guildID as string);
+		if (!guild) throw new Error('Guild not found - Is the bot still in the server?');
+		const endpoint = ResolveEndpoint(GuildEndpoints.CREATE_CHANNEL, { guild });
+		const payload = {
+			...this,
+			name
+		};
+		const data = await this.#client.wsClient.SendRequest('POST', endpoint, { body: payload }) as APIChannel;
+		return new Channel(this.#client, data);
 	}
 
 	async send(content: any) : Promise<Message | null> {
