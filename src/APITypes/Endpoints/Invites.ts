@@ -4,3 +4,4 @@ enum Endpoint {
 	GET_GUILD_INVITES = '/guilds/{guild_id}/invites'
 }
 export default Endpoint;
+module.exports = exports.default;
