@@ -72,7 +72,7 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 		if (!itemID) itemID = guildID;
 
 		const endpoint = ResolveEndpoint(this.endpoint, { 'guild': { id: guildID }, [this.endpointKey]: { id: itemID } });
-		const data = await this.#client.wsClient?.SendRequest('GET', endpoint);
+		const data = await this.#client.wsClient.SendRequest('GET', endpoint);
 		if (!data) return undefined;
 
 		// @ts-ignore

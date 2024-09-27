@@ -151,7 +151,7 @@ export default class Interaction {
 		if (!this.replied) throw new Error('Cannot fetch a reply that does not exist, you must reply() first');
 
 		const endpoint = ResolveEndpoint(InteractionEndpoints.GET_RESPONSE, { interaction: this, client: this.#client });
-		const data = await this.#client.wsClient?.SendRequest('GET', endpoint) as APIMessage;
+		const data = await this.#client.wsClient.SendRequest('GET', endpoint) as APIMessage;
 		this.message = new Message(this.#client, data);
 		return this.message;
 	}
@@ -167,7 +167,7 @@ export default class Interaction {
 			data: messagePaylod
 		}
 		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this });
-		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+		await this.#client.wsClient.SendRequest('POST', endpoint, { body: payload });
 
 		this.replied = true;
 
@@ -181,7 +181,7 @@ export default class Interaction {
 
 		const payload = ConvertMessagePayload(content);
 		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_RESPONSE, { interaction: this, client: this.#client });
-		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: payload });
+		await this.#client.wsClient.SendRequest('PATCH', endpoint, { body: payload });
 	}
 
 	async deleteReply() : Promise<void> {
@@ -190,7 +190,7 @@ export default class Interaction {
 		if (!this.deferred && !this.replied) throw new Error('Cannot delete a reply that does not exist, either reply or defer first');
 
 		const endpoint = ResolveEndpoint(InteractionEndpoints.DELETE_RESPONSE, { interaction: this, client: this.#client });
-		await this.#client.wsClient?.SendRequest('DELETE', endpoint);
+		await this.#client.wsClient.SendRequest('DELETE', endpoint);
 	}
 
 	async deferInteraction(data: any, callbackType: InteractionCallbackType, method: 'POST' | 'PATCH', endpoint: string) : Promise<void> {
@@ -207,7 +207,7 @@ export default class Interaction {
 			data: messagePayload
 		};
 	
-		await this.#client.wsClient?.SendRequest(method, endpoint, { body: payload });
+		await this.#client.wsClient.SendRequest(method, endpoint, { body: payload });
 	
 		this.deferred = true;
 		this.replied = true;
@@ -236,7 +236,7 @@ export default class Interaction {
 
 		const messagePaylod = ConvertMessagePayload(data);
 		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_FOLLOWUP, { interaction: this, client: this.#client });
-		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: messagePaylod });
+		await this.#client.wsClient.SendRequest('POST', endpoint, { body: messagePaylod });
 		this.followup = true;
 	}
 
@@ -245,7 +245,7 @@ export default class Interaction {
 
 		const messagePaylod = ConvertMessagePayload(data);
 		const endpoint = ResolveEndpoint(InteractionEndpoints.EDIT_FOLLOWUP, { interaction: this, client: this.#client, message: { id } });
-		await this.#client.wsClient?.SendRequest('PATCH', endpoint, { body: messagePaylod });
+		await this.#client.wsClient.SendRequest('PATCH', endpoint, { body: messagePaylod });
 	}
 
 	async showModal(data: Modal) : Promise<void> {
@@ -263,7 +263,7 @@ export default class Interaction {
 		}
 
 		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this, client: this.#client });
-		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+		await this.#client.wsClient.SendRequest('POST', endpoint, { body: payload });
 
 		this.modal = true;
 	}
@@ -302,7 +302,7 @@ export default class Interaction {
 		}
 
 		const endpoint = ResolveEndpoint(InteractionEndpoints.CREATE_RESPONSE, { interaction: this });
-		await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload });
+		await this.#client.wsClient.SendRequest('POST', endpoint, { body: payload });
 
 		this.replied = true;
 	}

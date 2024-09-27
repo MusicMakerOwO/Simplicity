@@ -54,7 +54,7 @@ export default class SlidingCache<TIn extends { id: string }, TOut extends { id:
 	}
 
 	async getAll(): Promise<TOut[]> {
-		const data = await this.#client.wsClient?.SendRequest('GET', this.bulkEndpoint) as TIn[];
+		const data = await this.#client.wsClient.SendRequest('GET', this.bulkEndpoint) as TIn[];
 		for (const role of data) {
 			this.set(role.id, role);
 		}
@@ -66,7 +66,7 @@ export default class SlidingCache<TIn extends { id: string }, TOut extends { id:
 	async fetch(id: string): Promise<TOut | undefined> {
 		if (!id) throw new Error('ID is required - If trying to fetch everything, use getAll()');
 		const fullEndpoit = ResolveEndpoint(this.endpoint, { guild_id: this.guildID, [this.endpointKey]: id });
-		const data = await this.#client.wsClient?.SendRequest('GET', fullEndpoit) as TIn;
+		const data = await this.#client.wsClient.SendRequest('GET', fullEndpoit) as TIn;
 		
 		const output = this.#WrapInClass(data);
 		this.set(id, data);

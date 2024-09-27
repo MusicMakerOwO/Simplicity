@@ -120,7 +120,7 @@ export default class Client extends Events {
 
 		this.id = this.#ExtractIDFromToken(this.#token);
 
-		this.wsClient?.connect(this.#token);
+		this.wsClient.connect(this.#token);
 	}
 
 	disconnect = this.destroy;
@@ -148,7 +148,7 @@ export default class Client extends Events {
 			}
 		}
 
-		this.wsClient?.WSSendBulk(payload);
+		this.wsClient.WSSendBulk(payload);
 	}
 
 	async setStatus(status: keyof typeof Pressence) : Promise<void> {

@@ -161,7 +161,7 @@ export default class Channel {
 	async send(content: any) : Promise<Message | null> {
 		const payload = ConvertMessagePayload(content);
 		const endpoint = ResolveEndpoint(MessageEndpoints.SEND_MESSAGE, { channel: this });
-		const data = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: payload }) as APIMessage;
+		const data = await this.#client.wsClient.SendRequest('POST', endpoint, { body: payload }) as APIMessage;
 		if (!data) return null;
 		return new Message(this.#client, data);
 	}
@@ -169,13 +169,13 @@ export default class Channel {
 	async setTyping(enabled: boolean) {
 		if (this.currentlyTyping === enabled) return;
 		const endpoint = ResolveEndpoint(ChannelEndpoints.TRIGGER_TYPING_INDICATOR, { channel: this });
-		await this.#client.wsClient?.SendRequest('POST', endpoint);
+		await this.#client.wsClient.SendRequest('POST', endpoint);
 		setTimeout(() => this.currentlyTyping = false, 10_000);
 	}
 
 	async delete() {
 		const endpoint = ResolveEndpoint(ChannelEndpoints.DELETE_CHANNEL, {channel: this});
-		await this.#client.wsClient?.SendRequest('DELETE', endpoint);
+		await this.#client.wsClient.SendRequest('DELETE', endpoint);
 	}
 
 	toString() {
@@ -191,7 +191,7 @@ export default class Channel {
 		if (temporary && typeof temporary !== 'boolean') throw new TypeError('temporary must be a boolean');
 
 		const endpoint = ResolveEndpoint(ChannelEndpoints.CREATE_CHANNEL_INVITE, { channel: this });
-		const inviteData = await this.#client.wsClient?.SendRequest('POST', endpoint, { body: data }) as APIInvite;
+		const inviteData = await this.#client.wsClient.SendRequest('POST', endpoint, { body: data }) as APIInvite;
 		return new Invite(this.#client, inviteData);
 	}
 
