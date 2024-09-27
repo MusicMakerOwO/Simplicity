@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { Readable } from "node:stream";
 
 import Client from "./Client";
 import Websocket from "./Websocket";
