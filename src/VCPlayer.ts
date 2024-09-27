@@ -1,3 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
+import { Readable } from "node:stream";
+
 import Client from "./Client";
 import Websocket from "./Websocket";
 import UDP from "./UDP";
@@ -78,6 +82,12 @@ export default class VCPlayer {
 	public sessionID: string = '';
 
 	public heartbeatInterval: NodeJS.Timeout | null = null;
+
+	public audioFile: Buffer | null = null;
+	public playback_volume: number = 100;
+	public bitrate: number = 441000;
+
+	public currently_playing: boolean = false;
 
 	constructor(client: Client, shardID: number, guildID: string, channelID: string) {
 		this.#client = client;
@@ -178,6 +188,59 @@ export default class VCPlayer {
 			console.log(`Received ${data.op} : ${VoiceOPCodes[data.op]} event`);
 			console.log(data);
 		});
+	}
+
+	async loadAudio(buffer: Buffer) : Promise<void>;
+	async loadAudio(filePath: string) : Promise<void>;
+	async loadAudio(pathOrBuffer: string | Buffer) : Promise<void> {
+		if (typeof pathOrBuffer === 'string') {
+			const filePath = path.resolve(pathOrBuffer);
+			
+			try {
+				fs.accessSync(filePath, fs.constants.R_OK | fs.constants.F_OK);
+			} catch (error) {
+				throw new Error('The file is not accessible - Double check the file exists and the permissions to read it');
+			}
+
+			const fileStats = fs.statSync(filePath);
+			if (!fileStats.isFile()) throw new Error('The path provided is not a file');
+
+			const fileData = await fs.promises.readFile(filePath);
+			return this.loadAudio(fileData);
+		}
+
+		this.audioFile = pathOrBuffer;
+
+		// TODO: load the audio file
+	}
+
+	play() {
+		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
+		
+		if (this.currently_playing) return;
+		this.currently_playing = true;
+		
+		// start playing the audio
+	}
+
+	pause() {
+		if (!this.currently_playing) return;
+		this.currently_playing = false;
+	}
+
+	restart() {
+		// restart the audio
+	}
+
+	stop() {
+		if (!this.audioFile) return;
+		this.currently_playing = false;
+		this.audioFile = null;
+	}
+
+	volume(volume: number) {
+		if (volume < 0 || volume > 100) throw new RangeError('Volume must be between 0 and 100');
+		this.playback_volume = volume / 100; // lock between 0 and 1 for higher precision
 	}
 
 	async disconnect() {
