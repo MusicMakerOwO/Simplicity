@@ -8,8 +8,7 @@ const TIME_TO_LIVE = 300_000; // 5 minutes
 
 export default class Collector extends EventEmitter {
 	#client: Client;
-	// @ts-ignore
-	#clearTimeout: NodeJS.Timeout;
+	#clearTimeout: NodeJS.Timeout | null = null;
 	public readonly interaction: Interaction;
 	public readonly messageID: string | null;
 
@@ -25,7 +24,7 @@ export default class Collector extends EventEmitter {
 	}
 
 	resetTimeout() {
-		clearTimeout(this.#clearTimeout);
+		if (this.#clearTimeout) clearTimeout(this.#clearTimeout);
 		this.#clearTimeout = setTimeout(() => {
 			this.emit('end');
 			this.destroy();
@@ -33,7 +32,7 @@ export default class Collector extends EventEmitter {
 	}
 
 	destroy() {
-		clearTimeout(this.#clearTimeout);
+		if (this.#clearTimeout) clearTimeout(this.#clearTimeout);
 		this.removeAllListeners();
 		this.#client.collectorLookup.delete(`${this.interaction.channel_id}::${this.messageID}`);
 	}
