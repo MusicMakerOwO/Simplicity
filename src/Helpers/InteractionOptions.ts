@@ -41,7 +41,6 @@ export default class InteractionOptions {
 
 	#parseOptions(options: Array<APIInteractionOption>) {
 		for (const option of options) {
-			console.log(option);
 			if ('value' in option) {
 				this.hoistedOptions[`${option.type}::${option.name}`] = option.value ?? null;
 			} else {
