@@ -37,7 +37,10 @@ export default class UDP extends Events {
 	}
 
 	close() {
-		if (this.#client) this.#client.close();
+		this.#client.removeAllListeners();
+		this.#client.close();
+		// @ts-ignore
+		this.#client = null; // free up the memory and let the GC do its job
 	}
 }
 module.exports = exports.default;

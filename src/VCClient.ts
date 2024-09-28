@@ -7,8 +7,6 @@ export default class VCClient {
 
 	constructor(client: Client) {
 		this.#client = client;
-
-		process.on('SIGINT', this.close.bind(this));
 	}
 
 	async addConnection(guildID: string, channelID: string) {
@@ -26,7 +24,7 @@ export default class VCClient {
 		this.connections.delete(guildID);
 	}
 
-	close() {
+	destroy() {
 		this.#client.wsClient.WSSendBulk({
 			op: 4,
 			d: {

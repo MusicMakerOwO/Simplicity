@@ -30,8 +30,6 @@ export default class WSClient {
 		this.#client = client;
 		this.heartbeat_interval = 0;
 		this.internalEvents = new EventDispatcher(client);
-
-		process.on('SIGINT', this.close.bind(this));
 	}
 	
 	#GenerateHeaders() {
@@ -156,7 +154,7 @@ export default class WSClient {
 		});
 	}
 
-	close() {
+	destroy() {
 		console.log('Closing all shards');
 		this.#client.connected_at = null;
 		this.#client.emit('events', 'Closing all shards');

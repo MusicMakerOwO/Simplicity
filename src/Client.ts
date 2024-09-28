@@ -100,6 +100,9 @@ export default class Client extends Events {
 		this.stickers 	= new ClientCache(this, 2000, Sticker, 	'sticker',	StickerEndpoints.GET_STICKER);
 		this.messages 	= new ClientCache(this,10000, Message,  'message', 	''							);
 		this.invites 	= new ClientCache(this, 2000, Invite, 	'invite', 	InviteEndpoints.GET_INVITE	);
+
+		process.on('SIGINT', this.destroy.bind(this));
+		process.on('SIGTERM', this.destroy.bind(this));
 	}
 
 	#ExtractIDFromToken(token: string): string {
@@ -126,7 +129,8 @@ export default class Client extends Events {
 	disconnect = this.destroy;
 	close = this.destroy;
 	destroy() {
-		this.wsClient.close();
+		this.wsClient.destroy();
+		this.vcClient.destroy();
 		this.#token = '';
 		this.user = null;
 		this.guilds.clear();
