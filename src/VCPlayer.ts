@@ -6,6 +6,46 @@ import Websocket from "./Websocket";
 import UDP from "./UDP";
 import { GatewayOPCodes, VoiceOPCodes } from "./APITypes/Enums";
 import { GatewayPayload, HelloEvent } from "./APITypes/GatewayTypes";
+import Range from "./Utils/Range";
+
+// optional dependencies
+let wav: typeof import('node-wav') | undefined;
+try {
+	wav = require('node-wav');
+} catch (e) { }
+
+let mp3: typeof import('mpg123-decoder') | undefined;
+try {
+	mp3 = require('mpg123-decoder');
+} catch (e) { }
+
+async function ReadMagicNumber(filePath: string) {
+	const buffer = Buffer.alloc(4);
+	const file = await fs.promises.open(filePath, 'r');
+	await file.read(buffer, 0, 12, 0); // read first 12 bytes, not the whole file
+	await file.close();
+	return buffer.readUInt32BE(0);
+}
+
+const SIGNATURE_LOOKUP = {
+	'52494646': 'wav',
+	'FFFB'	  : 'mp3',
+	'FFF3'	  : 'mp3',
+	'FFF2'	  : 'mp3',
+	'4F676753': 'ogg',
+	'664C6143': 'flac'
+}
+
+function IdentityFormat(magicNumber: Buffer) {
+	const signature = magicNumber.toString('hex', 0, 4);
+
+	for (const [number, format] of Object.entries(SIGNATURE_LOOKUP)) {
+		if (number === signature) return format;
+	}
+
+	return 'unknown';
+}
+
 
 const IP_DISCOVERY_PACKET = Buffer.alloc(74);
 IP_DISCOVERY_PACKET.writeUInt8(0x00, 0);
@@ -85,6 +125,7 @@ export default class VCPlayer {
 	public audioFile: Buffer | null = null;
 	public playback_volume: number = 100;
 	public bitrate: number = 441000;
+	public bitdepth: number = 16;
 
 	public currently_playing: boolean = false;
 
@@ -189,26 +230,22 @@ export default class VCPlayer {
 		});
 	}
 
-	async loadAudio(buffer: Buffer) : Promise<void>;
+	async loadAudio(buffer: Buffer, options: { bitrate: number, bitdepth: number }) : Promise<void>;
 	async loadAudio(filePath: string) : Promise<void>;
-	async loadAudio(pathOrBuffer: string | Buffer) : Promise<void> {
-		if (typeof pathOrBuffer === 'string') {
-			const filePath = path.resolve(pathOrBuffer);
+	async loadAudio(pathOrBuffer: string | Buffer, options?: { bitrate: number, bitdepth: number }) {
+		if (Buffer.isBuffer(pathOrBuffer)) {
+			if (!options) throw new Error('Options must be provided when loading audio from a buffer');
+			if (options.bitrate && typeof options.bitrate !== 'number') throw new TypeError(`Bitrate must be a number - Received ${typeof options.bitrate}`);
+			if (options.bitdepth && typeof options.bitdepth !== 'number') throw new TypeError(`Bitdepth must be a number - Received ${typeof options.bitdepth}`);
 			
-			try {
-				fs.accessSync(filePath, fs.constants.R_OK | fs.constants.F_OK);
-			} catch (error) {
-				throw new Error('The file is not accessible - Double check the file exists and the permissions to read it');
-			}
+			// round options.bitdepth to the nearest power of 2
+			options.bitdepth = Math.pow(2, Math.round(Math.log2(options.bitdepth ?? 8)));
 
-			const fileStats = fs.statSync(filePath);
-			if (!fileStats.isFile()) throw new Error('The path provided is not a file');
-
-			const fileData = await fs.promises.readFile(filePath);
-			return this.loadAudio(fileData);
+			this.audioFile = pathOrBuffer;
+			this.bitrate = Range(0, options.bitrate ?? 8000, 44100);
+			this.bitdepth = Range(8, options.bitdepth ?? 8, 16); // clamp it down to 8 or 16
+			return;
 		}
-
-		this.audioFile = pathOrBuffer;
 
 		// TODO: load the audio file
 	}
