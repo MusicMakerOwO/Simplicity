@@ -41,11 +41,11 @@ export default class WSClient {
 	}
 
 	sendHeartbeat(shardID: number) {
+		this.#client.emit('events', `Sending heartbeat to shard ${shardID + 1}`);
 		this.shards[shardID].send({
 			op: GatewayOPCodes.HEARTBEAT,
 			d: this.shard_seq[shardID] ?? null
 		});
-		this.#client.emit('events', `Sent heartbeat to shard ${shardID + 1}`);
 	}
 
 	async getRecommendedShards() : Promise<SessionStats> {
@@ -105,7 +105,6 @@ export default class WSClient {
 		const CloseWS = (error?: string) => {
 			if (error) console.error(error);
 			ws.close();
-			if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
 		}
 
 		ws.on('open', () => this.#client.emit('events', 'Connected to Discord Gateway'));
@@ -155,9 +154,9 @@ export default class WSClient {
 	}
 
 	destroy() {
-		console.log('Closing all shards');
 		this.#client.connected_at = null;
 		this.#client.emit('events', 'Closing all shards');
+		if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
 		for (const shard of Object.values(this.shards)) {
 			shard.close();
 		}

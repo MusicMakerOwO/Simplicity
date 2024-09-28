@@ -32,7 +32,6 @@ export default class WSClient extends Events {
 
 	close() : void {
 		this.ws.close();
-		console.log('Closed WS connection');
 	}
 
 	static connect(url: string) : WSClient {
