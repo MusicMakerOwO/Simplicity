@@ -14,17 +14,18 @@ try {
 	wav = require('node-wav');
 } catch (e) { }
 
+// @ts-ignore
 let mp3: typeof import('mpg123-decoder') | undefined;
 try {
 	mp3 = require('mpg123-decoder');
 } catch (e) { }
 
 async function ReadMagicNumber(filePath: string) {
-	const buffer = Buffer.alloc(4);
+	const buffer = Buffer.alloc(12);
 	const file = await fs.promises.open(filePath, 'r');
 	await file.read(buffer, 0, 12, 0); // read first 12 bytes, not the whole file
 	await file.close();
-	return buffer.readUInt32BE(0);
+	return buffer;
 }
 
 const SIGNATURE_LOOKUP = {
@@ -44,6 +45,40 @@ function IdentityFormat(magicNumber: Buffer) {
 	}
 
 	return 'unknown';
+}
+
+function ConvertToMonoTrack(...channels: Float32Array[]) {
+	const mono = new Float32Array(channels[0].length);
+	for (let i = 0; i < channels[0].length; i++) {
+		let sum = 0;
+		for (const channel of channels) {
+			sum += channel[i] ?? 0;
+		}
+		mono[i] = sum / channels.length;
+	}
+	return mono;
+}
+
+function RemoveSilence(channel: Float32Array, threshold = 0.01) {
+	let start = 0;
+	let end = 0;
+	for (let i = 0; i < channel.length; i++) {
+		if (Math.abs(channel[i]) > threshold) {
+			start = i;
+			break;
+		}
+	}
+	for (let i = channel.length - 1; i >= 0; i--) {
+		if (Math.abs(channel[i]) > threshold) {
+			end = i;
+			break;
+		}
+	}
+	const result = new Float32Array(end - start);
+	for (let i = start; i <= end; i++) {
+		result[i - start] = channel[i];
+	}
+	return result;
 }
 
 
@@ -122,7 +157,7 @@ export default class VCPlayer {
 
 	public heartbeatInterval: NodeJS.Timeout | null = null;
 
-	public audioFile: Buffer | null = null;
+	public audioFile: Float32Array | null = null;
 	public playback_volume: number = 100;
 	public bitrate: number = 441000;
 	public bitdepth: number = 16;
@@ -162,7 +197,6 @@ export default class VCPlayer {
 		this.#udp.send(IP_DISCOVERY_PACKET);
 		this.#udp.on('message', (data: Buffer) => {
 			const packet = ConvertUDPPayload(data);
-			console.log(packet);
 			switch (packet.type) {
 				case 'IP_DISCOVERY':
 					this.#localIP = packet.ip as string;
@@ -230,24 +264,56 @@ export default class VCPlayer {
 		});
 	}
 
-	async loadAudio(buffer: Buffer, options: { bitrate: number, bitdepth: number }) : Promise<void>;
-	async loadAudio(filePath: string) : Promise<void>;
-	async loadAudio(pathOrBuffer: string | Buffer, options?: { bitrate: number, bitdepth: number }) {
-		if (Buffer.isBuffer(pathOrBuffer)) {
-			if (!options) throw new Error('Options must be provided when loading audio from a buffer');
-			if (options.bitrate && typeof options.bitrate !== 'number') throw new TypeError(`Bitrate must be a number - Received ${typeof options.bitrate}`);
-			if (options.bitdepth && typeof options.bitdepth !== 'number') throw new TypeError(`Bitdepth must be a number - Received ${typeof options.bitdepth}`);
-			
-			// round options.bitdepth to the nearest power of 2
-			options.bitdepth = Math.pow(2, Math.round(Math.log2(options.bitdepth ?? 8)));
+	static SUPPORTED_FORMATS = ['wav', 'mp3'];
+	static PENDING_FORMATS = ['ogg', 'flac'];
 
-			this.audioFile = pathOrBuffer;
-			this.bitrate = Range(0, options.bitrate ?? 8000, 44100);
-			this.bitdepth = Range(8, options.bitdepth ?? 8, 16); // clamp it down to 8 or 16
+	async loadAudio(buffer: Buffer, bitrate?: number, bitdepth?: number) : Promise<void>;
+	async loadAudio(filePath: string) : Promise<void>;
+	async loadAudio(pathOrBuffer: string | Buffer, bitrate?: number, bitdepth?: number) {
+		if (Buffer.isBuffer(pathOrBuffer)) {
+
+			bitrate ??= 8000;
+			bitdepth ??= 16;
+			bitdepth = Math.pow(2, Math.round(Math.log2(bitdepth))); // lock to a power of 2
+
+			this.bitrate = Range(8000, Number(bitrate), 44100);
+			this.bitdepth = Range(8, Number(bitdepth), 16);
+
+			const audioData = new Float32Array(pathOrBuffer.length / (this.bitdepth / 8));
+			for (let i = 0; i < pathOrBuffer.length; i += this.bitdepth / 8) {
+				const value1 = pathOrBuffer.readInt16LE(i);
+				const value2 = pathOrBuffer.readInt16LE(i + 2);
+				// if depth is 8, then the value1 is the only value
+				const value = this.bitdepth === 8 ? value1 : (value1 << 16) | value2;
+				audioData[i] = this.bitdepth === 8 ? value / 128 : value / 32768;
+			}
+			this.audioFile = audioData;
 			return;
 		}
 
-		// TODO: load the audio file
+		const extension = pathOrBuffer.split('.').pop();
+		if (!extension) throw new Error('A file extension is required to load an audio file');
+
+		const fullPath = pathOrBuffer.startsWith('/')
+			? pathOrBuffer
+			: path.resolve(process.cwd(), pathOrBuffer);
+
+		const magicNumber = await ReadMagicNumber(fullPath);
+		const format = IdentityFormat(magicNumber);
+		if (format === 'unknown') throw new Error(`Unknown audio format - Supported formats are ${VCPlayer.SUPPORTED_FORMATS.join(', ')}`);
+
+		if (!VCPlayer.SUPPORTED_FORMATS.includes(format)) {
+			if (!VCPlayer.PENDING_FORMATS.includes(format)) throw new Error(`Unsupported audio format - Supported formats are ${VCPlayer.SUPPORTED_FORMATS.join(', ')}`);
+			throw new Error(`Support for ${format} is pending - Check back later`);
+		}
+
+		if (format === 'wav') {
+			if (!wav) throw new Error('node-wav is not installed - Run `npm install node-wav` to install it');
+			const buffer = await fs.promises.readFile(fullPath);
+			const decoded = wav.decode(buffer);
+			this.audioFile = ConvertToMonoTrack(...decoded.channelData);
+			this.bitrate = decoded.sampleRate;
+		}
 	}
 
 	play() {
@@ -297,6 +363,7 @@ export default class VCPlayer {
 		this.#udp = null;
 		this.#ws = null;
 		clearInterval(this.heartbeatInterval as NodeJS.Timeout);
+		clearTimeout(this.heartbeatInterval as NodeJS.Timeout);
 	}
 }
 module.exports = exports.default;
