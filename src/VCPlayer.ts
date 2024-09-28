@@ -59,29 +59,6 @@ function ConvertToMonoTrack(...channels: Float32Array[]) {
 	return mono;
 }
 
-function RemoveSilence(channel: Float32Array, threshold = 0.01) {
-	let start = 0;
-	let end = 0;
-	for (let i = 0; i < channel.length; i++) {
-		if (Math.abs(channel[i]) > threshold) {
-			start = i;
-			break;
-		}
-	}
-	for (let i = channel.length - 1; i >= 0; i--) {
-		if (Math.abs(channel[i]) > threshold) {
-			end = i;
-			break;
-		}
-	}
-	const result = new Float32Array(end - start);
-	for (let i = start; i <= end; i++) {
-		result[i - start] = channel[i];
-	}
-	return result;
-}
-
-
 const IP_DISCOVERY_PACKET = Buffer.alloc(74);
 IP_DISCOVERY_PACKET.writeUInt8(0x00, 0);
 IP_DISCOVERY_PACKET.writeUInt8(0x01, 1);
