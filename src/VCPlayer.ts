@@ -14,10 +14,9 @@ try {
 	wav = require('node-wav');
 } catch (e) { }
 
-// @ts-ignore
-let mp3: typeof import('mpg123-decoder') | undefined;
+let mp3: typeof import('mpg123-decoder').MPEGDecoder | undefined;
 try {
-	mp3 = require('mpg123-decoder');
+	mp3 = require('mpg123-decoder')?.MPEGDecoder;
 } catch (e) { }
 
 async function ReadMagicNumber(filePath: string) {
@@ -290,6 +289,18 @@ export default class VCPlayer {
 			const decoded = wav.decode(buffer);
 			this.audioFile = ConvertToMonoTrack(...decoded.channelData);
 			this.bitrate = decoded.sampleRate;
+			return;
+		}
+
+		if (format === 'mp3') {
+			if (!mp3) throw new Error('mpg123-decoder is not installed - Run `npm install mpg123-decoder` to install it');
+			const decoder = new mp3();
+			await decoder.ready; // wait for WASM to load
+			const buffer = await fs.promises.readFile(fullPath);
+			const decoded = decoder.decode(buffer);
+			this.audioFile = ConvertToMonoTrack(...decoded.channelData);
+			this.bitrate = decoded.sampleRate;
+			return;
 		}
 	}
 
