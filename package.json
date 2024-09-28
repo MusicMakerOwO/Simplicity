@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "audio-decode": "^2.2.2"
   }
 }
