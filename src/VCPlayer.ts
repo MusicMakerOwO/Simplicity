@@ -8,6 +8,13 @@ import { GatewayOPCodes, VoiceOPCodes } from "./APITypes/Enums";
 import { GatewayPayload, HelloEvent } from "./APITypes/GatewayTypes";
 import Range from "./Utils/Range";
 
+// Interface for plugins to modify audio data before transmission
+interface VoicePlugin {
+	init(bitrate: number, bitdepth: number, samples: number): void; // Initialize the plugin and pass in audio settings
+	process(audio: Float32Array): Float32Array; // Perform whatever operatoins on the audio data
+	destroy(): void; // Cleanup
+}
+
 // optional dependencies
 let wav: typeof import('node-wav') | undefined;
 try {
@@ -145,6 +152,20 @@ export default class VCPlayer {
 		this.#guildID = guildID;
 		this.#channelID = channelID;
 		this.shardID = shardID;
+	}
+
+	addPlugin(name: string, plugin: VoicePlugin) {
+		this.#client.vcClient.addPlugin(name, plugin);
+	}
+
+	applyPlugin(name: string, options: unknown) {
+		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
+
+		const plugin = this.#client.vcClient.plugins.get(name);
+		if (!plugin) throw new Error(`No plugin with the name "${name}" exists`);
+		
+		plugin.init(this.bitrate, this.bitdepth, this.audioFile.length ?? 0);
+		this.audioFile = plugin.process(this.audioFile, options);
 	}
 
 	joinChannel() {
