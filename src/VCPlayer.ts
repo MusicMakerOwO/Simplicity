@@ -180,6 +180,17 @@ export default class VCPlayer {
 		});
 	}
 
+	writeAudio(path: string) {
+		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
+		const output = wav?.encode([this.audioFile], {
+			sampleRate: this.bitrate,
+			float: true,
+			bitDepth: this.bitdepth
+		});
+		if (!output) throw new Error('Failed to encode audio data');
+		fs.writeFileSync(path, output);
+	}
+
 	SendHeartbeat() {
 		this.#ws?.send({
 			op: VoiceOPCodes.HEARTBEAT,
