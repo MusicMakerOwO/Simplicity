@@ -1,19 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import Client from "./Client";
-import Websocket from "./Websocket";
-import UDP from "./UDP";
-import { GatewayOPCodes, VoiceOPCodes } from "./APITypes/Enums";
-import { GatewayPayload, HelloEvent } from "./APITypes/GatewayTypes";
-import Range from "./Utils/Range";
+import Client from "../Client";
+import Websocket from "../Websocket";
+import UDP from "../UDP";
+import { GatewayOPCodes, VoiceOPCodes } from "../APITypes/Enums";
+import { GatewayPayload, HelloEvent } from "../APITypes/GatewayTypes";
+import Range from "../Utils/Range";
 
-// Interface for plugins to modify audio data before transmission
-interface VoicePlugin {
-	init(bitrate: number, bitdepth: number, samples: number): void; // Initialize the plugin and pass in audio settings
-	process(audio: Float32Array): Float32Array; // Perform whatever operatoins on the audio data
-	destroy(): void; // Cleanup
-}
+import type { VoicePluginConstructor } from "./types";
 
 // optional dependencies
 let wav: typeof import('node-wav') | undefined;
@@ -154,18 +149,18 @@ export default class VCPlayer {
 		this.shardID = shardID;
 	}
 
-	addPlugin(name: string, plugin: VoicePlugin) {
-		this.#client.vcClient.addPlugin(name, plugin);
+	loadPlugin(name: string, plugin: VoicePluginConstructor) {
+		this.#client.vcClient.loadPlugin(name, plugin);
+	}
+	removePlugin(name: string) {
+		this.#client.vcClient.removePlugin(name);
 	}
 
-	applyPlugin(name: string, options: unknown) {
+	async applyPlugin(name: string, options: unknown) {
 		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
 
-		const plugin = this.#client.vcClient.plugins.get(name);
-		if (!plugin) throw new Error(`No plugin with the name "${name}" exists`);
-		
-		plugin.init(this.bitrate, this.bitdepth, this.audioFile.length ?? 0);
-		this.audioFile = plugin.process(this.audioFile, options);
+		this.#client.vcClient.initPlugin(name, this.bitrate, this.bitdepth, this.audioFile.length ?? 0);
+		this.audioFile = await this.#client.vcClient.processAudio(name, this.audioFile, options);
 	}
 
 	joinChannel() {
