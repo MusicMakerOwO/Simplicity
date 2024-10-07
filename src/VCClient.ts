@@ -26,6 +26,10 @@ export default class VCClient extends VoicePluginManager {
 		this.connections.delete(guildID);
 	}
 
+	getConnection(guildID: string) {
+		return this.connections.get(guildID);
+	}
+
 	destroy() {
 		this.#client.wsClient.WSSendBulk({
 			op: 4,
