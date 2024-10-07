@@ -69,7 +69,7 @@ export default class Message {
 	public readonly id: string;
 	public readonly guild_id: string | null;
 	public readonly channel_id: string;
-	public readonly author: User;
+	public readonly user: User;
 	public readonly content: string;
 	public readonly timestamp: Date;
 	public readonly edited_timestamp: Date | null;
@@ -111,7 +111,7 @@ export default class Message {
 		this.id = data.id;
 		this.guild_id = data.guild_id ?? null;
 		this.channel_id = data.channel_id;
-		this.author = new User(client, data.author);
+		this.user = new User(client, data.author);
 		this.content = data.content;
 		this.timestamp = new Date(data.timestamp);
 		this.edited_timestamp = data.edited_timestamp ? new Date(data.edited_timestamp) : null;
