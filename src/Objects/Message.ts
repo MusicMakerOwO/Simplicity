@@ -162,5 +162,9 @@ export default class Message {
 
 	async reply(content: any) { 
 	}
+
+	toString() {
+		return `https://discord.com/channels/${this.guild_id ?? '@me'}/${this.channel_id}/${this.id}`;
+	}
 }
 module.exports = exports.default;
