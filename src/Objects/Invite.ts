@@ -1,6 +1,9 @@
 import Client from "../Client";
 import { APIInvite } from "../APITypes/Objects";
 
+import InviteEndpoints from "../APITypes/Endpoints/Invites";
+import ResolveEndpoint from "../Utils/ResolveEndpoint";
+
 import User from "./User";
 
 /*
@@ -69,5 +72,11 @@ export default class Invite {
 	inspect(): string {
 		return `<Invite ${this.code}>`;
 	}
+
+	async delete() {
+		const endpoint = ResolveEndpoint(InviteEndpoints.DELETE_INVITE, { invite: this });
+		await this.#client.wsClient.SendRequest(endpoint, 'DELETE');
+	}
+	
 }
 module.exports = exports.default;
