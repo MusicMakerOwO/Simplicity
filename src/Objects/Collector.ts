@@ -9,16 +9,16 @@ const TIME_TO_LIVE = 300_000; // 5 minutes
 export default class Collector extends EventEmitter {
 	#client: Client;
 	#clearTimeout: NodeJS.Timeout | null = null;
-	public readonly interaction: Interaction;
+	public readonly channelID: string;
 	public readonly messageID: string | null;
 
-	constructor(client: Client, interaction: Interaction & { message: { id: string } }) {
+	constructor(client: Client, channelID: string, messageID: string) {
 		super();
 		this.#client = client;
-		this.interaction = interaction;
-		this.messageID = interaction.message.id;
+		this.channelID = channelID;
+		this.messageID = messageID;
 
-		this.#client.collectorLookup.set(`${interaction.channel_id}::${this.messageID}`, this);
+		this.#client.collectorLookup.set(`${channelID}::${messageID}`, this);
 
 		this.resetTimeout();
 	}
@@ -34,7 +34,7 @@ export default class Collector extends EventEmitter {
 	destroy() {
 		if (this.#clearTimeout) clearTimeout(this.#clearTimeout);
 		this.removeAllListeners();
-		this.#client.collectorLookup.delete(`${this.interaction.channel_id}::${this.messageID}`);
+		this.#client.collectorLookup.delete(`${this.channelID}::${this.messageID}`);
 	}
 
 	handleInteraction(interaction: Interaction) {
@@ -42,7 +42,7 @@ export default class Collector extends EventEmitter {
 
 		this.resetTimeout();
 
-		const events = this.events.get('collect') as Function[];
+		const events = this.events.get('collect') ?? [];
 		for (const event of events) {
 			event(interaction);
 		}

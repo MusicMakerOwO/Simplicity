@@ -314,8 +314,7 @@ export default class Interaction {
 		if (!this.replied) throw new Error('Cannot create a collector before replying to the interaction');
 		if (!this.message) throw new Error('Cannot create a collector before fetching the reply');
 
-		// @ts-ignore
-		return new Collector(this.#client, this);
+		return new Collector(this.#client, this.channel_id, this.message.id);
 	}
 }
 module.exports = exports.default;
