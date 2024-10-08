@@ -23,5 +23,23 @@ export default class StructUtils {
 		const length = data.readUInt8(offset++);
 		return data.toString('utf8', offset, offset + length);
 	}
+
+	static CreateVarInt(value: number) : Buffer {
+		let size = 0b00;
+		if (value > 0x00FF) size = 0b01;
+		if (value > 0xFFFF) size = 0b10;
+		const buffer = Buffer.alloc(size + 1);
+		buffer.writeUInt8(size << 6 | (value & 0b00111111), 0);
+		buffer.writeUIntBE(value, 1, size);
+		return buffer;
+	}
+
+	static CreateOptional(data = Buffer.alloc(0)) : Buffer {
+		const value = data.length > 0;
+		const buffer = Buffer.alloc(1 + data.length);
+		buffer.writeUInt8(value ? 1 : 0, 0);
+		data.copy(buffer, 1);
+		return buffer;
+	}
 }
 module.exports = exports.default;
