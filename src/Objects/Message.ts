@@ -19,8 +19,14 @@ import {
 
 import User from './User';
 import Channel from './Channel';
+import Emoji from './Emoji';
 
 import SnowflakeToDate from '../Utils/SnowflakeToDate';
+
+import MessageEndpoints from '../APITypes/Endpoints/Messages';
+import ResolveEndpoint from '../Utils/ResolveEndpoint';
+import ConvertMessagePayload from '../Utils/ConvertMessagePayload';
+import Collector from './Collector';
 
 /*
 export declare type APIMessage = {
@@ -103,6 +109,7 @@ export default class Message {
 	public readonly poll: APIPoll | null;
 	public readonly call: APIMessageCall | null;
 
+	public readonly emojis: Array<{ id: string, name: string, animated: boolean }>;
 	public readonly created_at: Date;
 
 	constructor(client: Client, data: APIMessage) {
@@ -145,6 +152,18 @@ export default class Message {
 		this.poll = data.poll ?? null;
 		this.call = data.call ?? null;
 
+		this.emojis = [];
+
+		const foundEmojis = this.content.match(/<a?:\w+:\d+>/g) ?? [];
+		for (const emoji of foundEmojis) {
+			const match = emoji.match(/<(a)?:(\w+):(\d+)>/) as RegExpMatchArray;
+			this.emojis.push({
+				id: match.shift() as string,
+				name: match.shift() as string,
+				animated: match.shift() === 'a'
+			});
+		}
+
 		this.created_at = SnowflakeToDate(this.id);
 	}
 
@@ -160,11 +179,60 @@ export default class Message {
 		return this.#client.guilds.getSync(this.guild_id as string) ?? null;
 	}
 
-	async reply(content: any) { 
+	get channel() {
+		return this.#client.channels.getSync(this.channel_id) ?? null;
 	}
 
 	toString() {
 		return `https://discord.com/channels/${this.guild_id ?? '@me'}/${this.channel_id}/${this.id}`;
+	}
+
+	async reply(content: any) : Promise<Message> {
+		const payload = ConvertMessagePayload(content);
+		const endpoint = ResolveEndpoint(MessageEndpoints.CREATE_MESSAGE, { channel: { id: this.channel_id } });
+		const response = await this.#client.wsClient.SendRequest(endpoint, 'POST', { body: payload }) as APIMessage;
+		return new Message(this.#client, response);
+	}
+
+	async delete() {
+		const endpoint = ResolveEndpoint(MessageEndpoints.DELETE_MESSAGE, { channel: { id: this.channel_id }, message: this });
+		await this.#client.wsClient.SendRequest(endpoint, 'DELETE');
+	}
+	
+	async edit(content: any) {
+		const payload = ConvertMessagePayload(content);
+		const endpoint = ResolveEndpoint(MessageEndpoints.EDIT_MESSAGE, { channel: { id: this.channel_id }, message: this });
+		const response = await this.#client.wsClient.SendRequest('PATCH', endpoint, { body: payload }) as APIMessage;
+		return new Message(this.#client, response);
+	}
+
+	async react(emoji: string | Emoji) {
+		const emojiString = String(emoji);
+		if (emojiString === '[object Object]') throw new Error('Invalid emoji provided - Enter a string (preferred) <:emoji:ID> or <a:emoji:ID> or use the Emoji object');
+
+		const [_, emojiName, emojiID ] = emojiString.match(/(\w+):(\d+)/) ?? []
+		if (!emojiID || !emojiName) throw new Error('Invalid emoji provided - Enter a string (preferred) <:emoji:ID> or <a:emoji:ID> or use the Emoji object');
+
+		const endpoint = ResolveEndpoint(MessageEndpoints.CREATE_REACTION, { channel: { id: this.channel_id }, message: this, emoji: `${emojiName}%3A${emojiID}` });
+		await this.#client.wsClient.SendRequest('PUT', endpoint);
+	}
+
+	simplify() {
+		return {
+			guildID: this.guild_id,
+			channelID: this.channel_id,
+			userID: this.user.id,
+			content: this.content,
+			timestamp: this.timestamp.toISOString(),
+			embeds: this.embeds,
+			files: this.attachments,
+			emojis: this.emojis,
+			sticker: this.sticker
+		}
+	}
+	
+	createCollector() {
+		return new Collector(this.#client, this.channel_id, this.id);
 	}
 }
 module.exports = exports.default;
