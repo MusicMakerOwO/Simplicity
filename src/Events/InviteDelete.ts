@@ -10,3 +10,4 @@ export default {
 		client.emit('inviteDelete', invite);
 	}
 }
+module.exports = exports.default;

@@ -10,3 +10,4 @@ export default {
 		client.emit('inviteCreate', invite);
 	}
 }
+module.exports = exports.default;

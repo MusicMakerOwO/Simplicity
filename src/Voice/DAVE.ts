@@ -11,10 +11,8 @@ import { UDP_Packet } from "./types";
 import { UDP_OP_CODES } from "./enums";
 import { GatewayPayload } from "../APITypes/GatewayTypes";
 
-import UDP from "../UDP";
-
 export default class DAVE {
-	DECODERS: Map<number, (data: Buffer) => UDP_Packet>;
+	DECODERS: Map<number, (data: Buffer, sequence: number) => any>;
 
 	#signingKeys: { public: string; private: string; };
 	#encryptionKeys: { public: string; private: string; };
@@ -37,7 +35,8 @@ export default class DAVE {
 		// todo
 	}
 
-	decode(data: Buffer | GatewayPayload) : UDP_Packet | void {
+	decode(data: Buffer | GatewayPayload) : UDP_Packet {
+		// @ts-ignore
 		if (!Buffer.isBuffer(data)) return this.processInternalPacket(data);
 		if (!Buffer.isBuffer(data)) throw new Error("UDP Packet must be a binary buffer, otherwise it is a GatewayPayload and is already decoded.");
 
@@ -49,7 +48,8 @@ export default class DAVE {
 		}
 		const decoder = this.DECODERS.get(op);
 		if (!decoder) throw new Error(`Unknown OP Code: ${op}`);
-		return decoder(data);
+		const packet = decoder(data, sequence);
+		return { op: op, data: packet };
 	}
 
 	deriveKey(secret: string, label: string, context: Buffer) : Buffer {
@@ -65,3 +65,4 @@ export default class DAVE {
 		return { public: publicKey, private: privateKey };
 	}
 }
+module.exports = exports.default;
