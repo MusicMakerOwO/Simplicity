@@ -7,3 +7,11 @@ export interface VoicePlugin {
 export interface VoicePluginConstructor {
 	new (): VoicePlugin;
 }
+
+export type UDP_Packet = {
+	type: 0x01 | 0x02;
+	op: number;
+	length: number;
+	ssrc: number;
+	data: Buffer;
+};
