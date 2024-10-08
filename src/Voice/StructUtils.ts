@@ -24,3 +24,4 @@ export default class StructUtils {
 		return data.toString('utf8', offset, offset + length);
 	}
 }
+module.exports = exports.default;
