@@ -24,3 +24,4 @@ export default class Distortion {
 		return audio;
 	}
 }
+module.exports = exports.default;

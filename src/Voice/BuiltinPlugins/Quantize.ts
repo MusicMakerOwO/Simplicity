@@ -30,3 +30,4 @@ export default class Quantize {
 		return audio;
 	}
 }
+module.exports = exports.default;
