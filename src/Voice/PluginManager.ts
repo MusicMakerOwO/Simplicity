@@ -1,7 +1,15 @@
 import type { VoicePlugin, VoicePluginConstructor } from './types';
 
+import Distortion from './BuiltinPlugins/Distortion';
+import Quantization from './BuiltinPlugins/Quantize';
+
 export default class PluginManager {
 	#plugins: Map<string, VoicePlugin> = new Map();
+
+	constructor() {
+		this.loadPlugin('distortion', Distortion);
+		this.loadPlugin('quantization', Quantization);
+	}
 
 	loadPlugin(name: string, plugin: VoicePluginConstructor) {
 		if (this.#plugins.has(name)) {
