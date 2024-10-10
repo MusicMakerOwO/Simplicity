@@ -3,6 +3,7 @@ import type { VoicePlugin, VoicePluginConstructor } from './types';
 import Distortion from './BuiltinPlugins/Distortion';
 import Quantization from './BuiltinPlugins/Quantize';
 import Corrupt from './BuiltinPlugins/Corrupt';
+import Echo from './BuiltinPlugins/Echo';
 
 export default class PluginManager {
 	#plugins: Map<string, VoicePlugin> = new Map();
@@ -11,6 +12,7 @@ export default class PluginManager {
 		this.loadPlugin('distortion', Distortion);
 		this.loadPlugin('quantization', Quantization);
 		this.loadPlugin('corrupt', Corrupt);
+		this.loadPlugin('echo', Echo);
 	}
 
 	loadPlugin(name: string, plugin: VoicePluginConstructor) {
