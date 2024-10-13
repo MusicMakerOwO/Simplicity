@@ -6,11 +6,12 @@
   "author": "@musicmaker",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node ./pre-build.js && echo \"Compiling to JS...\" && tsc -p tsconfig.json",
+    "build": "node ./pre-build.js && rm -rf ./build && echo \"Compiling to JS...\" && tsc -p tsconfig.json --emitDeclarationOnly --declaration --outDir ./build && npx sucrase ./src --out-dir ./dist --transforms typescript",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "@types/node-wav": "^0.0.3",
+    "sucrase": "^3.35.0",
     "typescript": "^5.5.2"
   },
   "optionalDependencies": {
