@@ -7,7 +7,7 @@ export default class LRUCache<T, V> extends Map<T, V> {
 	}
 
 	override set(key: T, value: V) : this {
-		if (this.size >= this.maxSize) this.delete(this.keys().next().value);
+		if (this.size >= this.maxSize) this.delete(this.keys().next().value as T);
 		return super.set(key, value);
 	}
 
