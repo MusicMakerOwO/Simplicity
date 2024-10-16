@@ -5,7 +5,7 @@ console.log('Adjusting exports for CommonJS compatibility...');
 const fs = require('node:fs');
 const { execSync } = require('node:child_process');
 
-const files = {} // <path/to/file>: <content>
+let files = {} // <path/to/file>: <content>
 
 function ReadFolder(dir) {
 	fs.readdirSync(dir).forEach(file => {
@@ -52,6 +52,53 @@ console.log('Compiling declarations...');
 execSync(`tsc -p ${__dirname}/tsconfig.json --emitDeclarationOnly --declaration --outDir ${__dirname}/build`, { stdio: 'inherit' });
 
 console.log('Compiling to JS...');
-execSync(`npx sucrase ${__dirname}/src --out-dir ${__dirname}/build --transforms typescript`, { stdio: 'ignore' });
+execSync(`npx sucrase ${__dirname}/src --out-dir ${__dirname}/build --transforms typescript,imports`, { stdio: 'ignore' });
+
+/*
+class Client extends _Events2.default {
+	#token;
+	
+	
+	
+	 __init() {this.connected_at = null} // set in.wsClientClient
+	
+
+	 __init2() {this.user = null}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	 __init3() {this.pressence = 'ONLINE'}
+	 __init4() {this.activity = null}
+	 */
+
+// remove excessive whitespace
+
+console.log('Cleaning up...');
+
+files = {};
+ReadFolder(`${__dirname}/build`);
+
+const topComment = `
+///////////////////////////////////////////////////////////////////
+// Welcome to the Simplicity source code!						 //
+// This code is written in TypeScript and compiled using Sucrase //
+// For any issues, please report them on the GitHub repository	 //
+// https://github.com/MusicMakerOwO/Simplicity/issues 			 //
+///////////////////////////////////////////////////////////////////
+`.trim();
+
+for (const file in files) {
+	const content = files[file];
+	const newContent = content.replace(/(\s*\n){3,}/g, '\n\n');
+	fs.writeFileSync(file, topComment + '\n\n' + newContent);
+}
 
 console.log('Done!');
