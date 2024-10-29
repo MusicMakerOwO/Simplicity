@@ -1,5 +1,5 @@
 import dgram from 'node:dgram';
-import Events from './Events';
+import Events from './EventListener';
 
 export default class UDP extends Events {
 	#client: dgram.Socket;

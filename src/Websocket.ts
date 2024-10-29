@@ -1,4 +1,4 @@
-import Events from './Events';
+import Events from './EventListener';
 import { WSEvents } from './Enums/Events';
 
 export default class WSClient extends Events {

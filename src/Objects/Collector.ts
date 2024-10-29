@@ -2,7 +2,7 @@
 
 import Interaction from './Interaction';
 import Client from '../Client';
-import EventEmitter from '../Events';
+import EventEmitter from '../EventListener';
 
 const TIME_TO_LIVE = 300_000; // 5 minutes
 

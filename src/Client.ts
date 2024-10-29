@@ -2,7 +2,7 @@ import HTTPS from "node:https";
 
 import WSClient from "./WSClient";
 import VCClient from "./VCClient";
-import Events from "./Events";
+import Events from "./EventListener";
 import ResolveIntents from "./Utils/ResolveIntents";
 import ClientCache from "./DataStructures/ClientCache";
 import SlashCommand from "./Builders/Commands/SlashCommand";
