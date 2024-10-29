@@ -49,10 +49,10 @@ if (fs.existsSync(`${__dirname}/build`)) {
 }
 
 console.log('Compiling declarations...');
-execSync(`tsc -p ${__dirname}/tsconfig.json --emitDeclarationOnly --declaration --outDir ${__dirname}/build`, { stdio: 'inherit' });
+execSync(`tsc -p ${__dirname}/tsconfig.json --emitDeclarationOnly`, { stdio: 'inherit' });
 
 console.log('Compiling to JS...');
-execSync(`npx sucrase ${__dirname}/src --out-dir ${__dirname}/build --transforms typescript,imports`, { stdio: 'ignore' });
+execSync(`npx sucrase ${__dirname}/src --out-dir ${__dirname}/build --transforms typescript,imports`, { stdio: 'inherit' });
 
 /*
 class Client extends _Events2.default {

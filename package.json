@@ -6,7 +6,7 @@
   "author": "@musicmaker",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node ./build.js",
+    "build": "node --trace-warnings ./build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
