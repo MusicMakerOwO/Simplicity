@@ -8,7 +8,7 @@ import { GatewayOPCodes, VoiceOPCodes } from "../APITypes/Enums";
 import { GatewayPayload, HelloEvent } from "../APITypes/GatewayTypes";
 import Range from "../Utils/Range";
 
-import type { VoicePlugin, VoicePluginConstructor } from "./types";
+import type { VoicePluginConstructor } from "./types";
 
 // optional dependencies
 let wav: typeof import('node-wav') | undefined;
@@ -136,13 +136,14 @@ export default class VCPlayer {
 	public heartbeatInterval: NodeJS.Timeout | null;
 
 	public audioFile: Float32Array | null;
+	public cleanAudio: typeof this.audioFile;
 	public playback_volume: number;
 	public bitrate: number;
 	public bitdepth: number;
 
 	public currently_playing: boolean = false;
 
-	public pluginList: Array<[VoicePlugin, unknown] | [null, null]>; // [null, null] if a plugin is not applied, we discard the memory but not the index
+	public pluginList: Array<[string, unknown] | [null, null]>; // [null, null] if a plugin is not applied, we discard the memory but not the index
 
 	constructor(client: Client, shardID: number, guildID: string, channelID: string) {
 		this.#client = client;
@@ -165,6 +166,7 @@ export default class VCPlayer {
 		this.heartbeatInterval = null;
 
 		this.audioFile = null;
+		this.cleanAudio = null;
 		this.playback_volume = 100;
 		this.bitrate = 441000;
 		this.bitdepth = 16;
@@ -176,15 +178,34 @@ export default class VCPlayer {
 	loadPlugin(name: string, plugin: VoicePluginConstructor) {
 		this.#client.vcClient.loadPlugin(name, plugin);
 	}
-	removePlugin(name: string) {
-		this.#client.vcClient.removePlugin(name);
-	}
 
 	async applyPlugin(name: string, options: unknown) {
 		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
+		await this.#processPlugin(name, options);
+		this.pluginList.push([name, options]);
+	}
 
-		this.#client.vcClient.initPlugin(name, this.bitrate, this.bitdepth, this.audioFile.length ?? 0);
-		this.audioFile = await this.#client.vcClient.processAudio(name, this.audioFile, options);
+	async #processPlugin(pluginName: string, options: unknown) {
+		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
+		this.#client.vcClient.initPlugin(pluginName, this.bitrate, this.bitdepth, this.audioFile.length ?? 0);
+		this.audioFile = await this.#client.vcClient.processAudio(pluginName, this.audioFile, options);
+	}
+
+	async removePlugin(name: string) {
+		if (!this.audioFile) throw new Error('No audio file loaded - Use loadAudio() to load a file first');
+		
+		const index = this.pluginList.findIndex(([pluginName]) => pluginName === name);
+		if (index === -1) return;
+		// discard the memory but not the index, small memory leak but saves overhead shifting the array
+		// In my testing this only uses 9 bytes of memory per index so it's not a big deal
+		this.pluginList[index] = [null, null];
+
+		// need to reapply all plugins in order
+		this.audioFile = this.cleanAudio;
+		for (const [pluginName, options] of this.pluginList) {
+			if (!pluginName) continue;
+			await this.#processPlugin(pluginName, options);
+		}
 	}
 
 	joinChannel() {
@@ -315,6 +336,7 @@ export default class VCPlayer {
 				audioData[i] = this.bitdepth === 8 ? value / 128 : value / 32768;
 			}
 			this.audioFile = audioData;
+			this.cleanAudio = audioData;
 			return;
 		}
 
@@ -339,6 +361,7 @@ export default class VCPlayer {
 			const buffer = await fs.promises.readFile(fullPath);
 			const decoded = wav.decode(buffer);
 			this.audioFile = ConvertToMonoTrack(...decoded.channelData);
+			this.cleanAudio = this.audioFile;
 			this.bitrate = decoded.sampleRate;
 			return;
 		}
