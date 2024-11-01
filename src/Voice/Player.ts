@@ -8,7 +8,7 @@ import { GatewayOPCodes, VoiceOPCodes } from "../APITypes/Enums";
 import { GatewayPayload, HelloEvent } from "../APITypes/GatewayTypes";
 import Range from "../Utils/Range";
 
-import type { VoicePluginConstructor } from "./types";
+import type { VoicePlugin, VoicePluginConstructor } from "./types";
 
 // optional dependencies
 let wav: typeof import('node-wav') | undefined;
@@ -118,35 +118,59 @@ function ConvertUDPPayload(data: Buffer) {
 
 export default class VCPlayer {
 	#client: Client;
-	#ws: Websocket | null = null;
-	#udp: UDP | null = null;
 	#guildID: string;
 	#channelID: string;
-	#localIP: string = '';
+	#ws: Websocket | null;
+	#udp: UDP | null;
+	#localIP: string;
 
-	public readonly jitter = Math.random() * 0.5 + 0.5; // 0.5 -> 1.0
+	public jitter: number; // 0.5 -> 1.0
 
-	public shardID: number = 0;
-	public ssrc: number = 0;
-	public ip: string = '';
-	public port: number = 0;
-	public modes: string[] = [];
-	public sessionID: string = '';
+	public shardID: number;
+	public ssrc: number;
+	public ip: string;
+	public port: number;
+	public modes: string[];
+	public sessionID: string;
 
-	public heartbeatInterval: NodeJS.Timeout | null = null;
+	public heartbeatInterval: NodeJS.Timeout | null;
 
-	public audioFile: Float32Array | null = null;
-	public playback_volume: number = 100;
-	public bitrate: number = 441000;
-	public bitdepth: number = 16;
+	public audioFile: Float32Array | null;
+	public playback_volume: number;
+	public bitrate: number;
+	public bitdepth: number;
 
 	public currently_playing: boolean = false;
+
+	public pluginList: Array<[VoicePlugin, unknown] | [null, null]>; // [null, null] if a plugin is not applied, we discard the memory but not the index
 
 	constructor(client: Client, shardID: number, guildID: string, channelID: string) {
 		this.#client = client;
 		this.#guildID = guildID;
 		this.#channelID = channelID;
+
+		this.#ws = null;
+		this.#udp = null;
+		this.#localIP = '';
+
+		this.jitter = Math.random() * 0.5 + 0.5; // 0.5 -> 1.0
+
 		this.shardID = shardID;
+		this.ssrc = 0;
+		this.ip = '';
+		this.port = 0;
+		this.modes = [];
+		this.sessionID = '';
+
+		this.heartbeatInterval = null;
+
+		this.audioFile = null;
+		this.playback_volume = 100;
+		this.bitrate = 441000;
+		this.bitdepth = 16;
+		this.currently_playing = false;
+
+		this.pluginList = [];
 	}
 
 	loadPlugin(name: string, plugin: VoicePluginConstructor) {
