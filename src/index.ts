@@ -1,3 +1,6 @@
+require('./PluginManager'); // runs automatically
+
+
 exports.Client = require('./Client');
 exports.WSClient = require('./WSClient');
 exports.VCClient = require('./VCClient');
