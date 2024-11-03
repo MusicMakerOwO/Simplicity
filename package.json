@@ -2,7 +2,8 @@
   "name": "simplicity",
   "version": "0.0.1",
   "description": "What discord.js could have been",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/typings.d.ts",
   "author": "@musicmaker",
   "license": "Apache-2.0",
   "scripts": {
@@ -11,6 +12,7 @@
   },
   "devDependencies": {
     "@types/node-wav": "^0.0.3",
+    "dts-bundle-generator": "^9.5.1",
     "sucrase": "^3.35.0",
     "typescript": "^5.5.2"
   },

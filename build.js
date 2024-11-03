@@ -31,10 +31,6 @@ for (const file in files) {
 	modified++;
 }
 
-// console.log(`Read ${Object.keys(files).length} files, modified ${modified} files`);
-
-// node ./pre-build.js && echo \"Compiling to JS...\" && tsc -p tsconfig.json --emitDeclarationOnly --declaration --outDir ./build && npx sucrase ./src --out-dir ./dist --transforms typescript
-
 console.log('Checking for compilation error...');
 const tsc = execSync(`tsc -p ${__dirname}/tsconfig.json --noEmit`, { stdio: 'pipe' });
 
@@ -50,6 +46,17 @@ if (fs.existsSync(`${__dirname}/build`)) {
 
 console.log('Compiling declarations...');
 execSync(`tsc -p ${__dirname}/tsconfig.json --emitDeclarationOnly`, { stdio: 'inherit' });
+console.log('Bundling declarations...');
+execSync(`npx dts-bundle-generator --project ${__dirname}/tsconfig.json --no-check --out-file ${__dirname}/build/typings.d.ts ${__dirname}/src/index.ts`, { stdio: 'inherit' });
+
+console.log('Clearing excess declarations...');
+files = {};
+ReadFolder(`${__dirname}/build`);
+for (const file in files) {
+	if (file.endsWith('.d.ts') && !file.endsWith('typings.d.ts')) {
+		fs.rmSync(file);
+	}
+}
 
 console.log('Compiling to JS...');
 execSync(`npx sucrase ${__dirname}/src --out-dir ${__dirname}/build --transforms typescript,imports`, { stdio: 'inherit' });
