@@ -4,6 +4,7 @@ const fs = require('fs');
 const PrimaryPackage = require(`../package.json`);
 
 const resolutionTable = new Map<string, string>();
+const modificationTable = new Map<string, string>(); // originalPath -> Plugin that modified it
 
 interface PluginPackage {
 	name: string;
@@ -45,7 +46,7 @@ function RecursiveReadFolder(folder: string) {
 	return files;
 }
 
-const ConflictingPlugins = new Map<string, string>();
+const ConflictingPlugins: string[] = [];
 
 const plugins = fs.readdirSync(`${__dirname}/../Plugins`, { withFileTypes: true });
 for (const plugin of plugins) {
@@ -72,12 +73,35 @@ for (const plugin of plugins) {
 		console.error(`[${plugin.name}] Supported versions: ${pluginPackage.supported_versions.join(', ')}`);
 	}
 
+	const conflictingFiles: string[] = [];
+	let conflict = false;
+
 	const pluginFiles = RecursiveReadFolder(pluginPath);
 	for (const file of pluginFiles) {
 		const relativePath = file.replace(`${__dirname}/../Plugins/${plugin.name}/`, '');
 		const originalPath = `${__dirname}/${relativePath}`;
 		try {
-			resolutionTable.set(require.resolve(originalPath), require.resolve(file));
+			const originalFullPath = require.resolve(originalPath);
+			const pluginFullPath = require.resolve(file);
+			if (conflict) {
+				conflictingFiles.push(originalPath);
+				continue;
+			}
+			if (!resolutionTable.has(pluginFullPath)) {
+				resolutionTable.set(pluginFullPath, originalFullPath);
+				modificationTable.set(originalFullPath, plugin.name);
+			} else {
+				conflict = true;
+				const conflictingPlugin = modificationTable.get(originalFullPath) as string;
+				if (!ConflictingPlugins.includes(conflictingPlugin)) {
+					ConflictingPlugins.push(conflictingPlugin);
+				}
+				if (!ConflictingPlugins.includes(plugin.name)) {
+					ConflictingPlugins.push(plugin.name);
+				}
+				conflictingFiles.push(originalPath);
+				continue;
+			}
 		} catch (e) {
 			// ignore, file doesn't exist
 		}
