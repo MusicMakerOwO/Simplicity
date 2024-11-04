@@ -1,4 +1,4 @@
-import BaseCommand from "./BaseCommand";
+import BaseCommand from "./Command";
 import ApplyOptionMethods from "./ApplyOptionMethods";
 
 class SubCommand extends BaseCommand {

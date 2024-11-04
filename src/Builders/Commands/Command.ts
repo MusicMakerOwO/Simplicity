@@ -1,4 +1,4 @@
-export default class BaseCommand {
+export default class Command {
 
 	public type: number | null; // only used for subcommands + groups
 	public _name: string;
@@ -13,7 +13,7 @@ export default class BaseCommand {
 	}
 
 	static isValid(command: any) : boolean {
-		if (command instanceof BaseCommand) return true;
+		if (command instanceof Command) return true;
 
 		if (!command || typeof command !== 'object') return false;
 		if (typeof command.name !== 'string') return false;
