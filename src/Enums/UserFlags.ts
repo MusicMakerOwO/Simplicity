@@ -15,3 +15,4 @@ export default {
 	BOT_HTTP_INTERACTIONS: 1 << 19,
 	ACTIVE_DEVELOPER: 1 << 22
 }
+module.exports = exports.default;

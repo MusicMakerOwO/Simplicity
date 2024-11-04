@@ -5,3 +5,4 @@ export default {
 	REQUIRE_TAG: 1 << 4,
 	HIDE_MEDIA_DOWNLOAD_OPTION: 1 << 15,
 }
+module.exports = exports.default;

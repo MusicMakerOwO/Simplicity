@@ -133,3 +133,4 @@ export default {
 	guildMessagePolls: 1 << 24,
 	directMessagePolls: 1 << 25
 }
+module.exports = exports.default;
