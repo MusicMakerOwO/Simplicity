@@ -42,10 +42,10 @@ export default class Client extends Events {
 	public wsClient: WSClient;
 	public vcClient: VCClient;
 	public intents: bigint;
-	public connected_at: Date | null = null; // set in.wsClientClient
+	public connected_at: Date | null;
 	public id: string;
 
-	public user: User | null = null;
+	public user: User | null;
 
 	public guilds: ClientCache<APIGuild, Guild>;
 	public members: ClientCache<APIMember, Member>;
@@ -57,14 +57,20 @@ export default class Client extends Events {
 	public messages: ClientCache<APIMessage, Message>;
 	public invites: ClientCache<APIInvite, Invite>;
 
-	public pressence: keyof typeof Pressence = 'ONLINE';
-	public activity: { name: string, type: number, url?: string, state?: string } | null = null;
+	public pressence: keyof typeof Pressence;
+	public activity: { name: string, type: number, url?: string, state?: string } | null;
 
-	// <channelID::messageID, Collector>
-	public collectorLookup: Map<string, Collector> = new Map();
+	public collectorLookup: Map<string, Collector>;
 
 	constructor(options : { token: string, intents: number | string[], cacheSize?: number }) {
 		super();
+
+		this.#token = '';
+		this.user = null; // This is set in the WSClient after the READY event
+		this.connected_at = null; // This is set in the WSClient after the READY event
+		this.activity = null;
+		this.collectorLookup = new Map(); // <channelID::messageID, Collector>
+		this.pressence = 'ONLINE';
 
 		options.cacheSize = Range(1, Number(options.cacheSize ?? 0), 100_000);
 		if (options.cacheSize >= 10_000) {
@@ -116,7 +122,7 @@ export default class Client extends Events {
 		return this.#token.split('.').map((part, i) => i < 2 ? part : 'X'.repeat(part.length)).join('.');
 	}
 
-	login = this.connect;
+	login(token?: string) { this.connect(token); }
 	connect(token?: string) {
 		if (token) this.#token = token;
 		if (!this.#token) throw new Error('No token provided, add it to the client constructor or pass it into this function');
@@ -126,8 +132,10 @@ export default class Client extends Events {
 		this.wsClient.connect(this.#token);
 	}
 
-	disconnect = this.destroy;
-	close = this.destroy;
+	// disconnect = this.destroy;
+	// close = this.destroy;
+	disconnect() { this.destroy(); }
+	close() { this.destroy(); }
 	destroy() {
 		this.wsClient.destroy();
 		this.vcClient.destroy();

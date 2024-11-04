@@ -4,10 +4,11 @@ import VoicePluginManager from "./Voice/PluginManager";
 
 export default class VCClient extends VoicePluginManager {
 	#client: Client;
-	public connections: Map<string, VCPlayer> = new Map();
+	public connections: Map<string, VCPlayer>;
 
 	constructor(client: Client) {
 		super();
+		this.connections = new Map();
 		this.#client = client;
 	}
 
