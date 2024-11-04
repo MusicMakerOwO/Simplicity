@@ -1,5 +1,5 @@
 import CommandOptionTypes from "../../Enums/CommandOptionTypes";
-import BaseOption from "./BaseOption";
+import BaseOption from "./Option";
 
 export default class IntegerOption extends BaseOption {
     public max_value: number = Number.MAX_SAFE_INTEGER;

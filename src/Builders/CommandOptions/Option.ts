@@ -15,7 +15,7 @@ max_length?	integer	The maximum allowed length (minimum of 1, maximum of 6000)	S
 autocomplete? **	boolean	If autocomplete interactions are enabled for this option	STRING, INTEGER, NUMBE
 */
 
-export default class BaseOption {
+export default class Option {
 	public type: number;
 	public _name: string;
 	public _description: string;

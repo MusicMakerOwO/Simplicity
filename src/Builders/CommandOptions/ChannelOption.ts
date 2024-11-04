@@ -1,5 +1,5 @@
 import CommandOptionTypes from "../../Enums/CommandOptionTypes";
-import BaseOption from "./BaseOption";
+import BaseOption from "./Option";
 
 export default class ChannelOption extends BaseOption {
     constructor() {
