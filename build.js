@@ -32,12 +32,7 @@ for (const file in files) {
 }
 
 console.log('Checking for compilation error...');
-const tsc = execSync(`tsc -p ${__dirname}/tsconfig.json --noEmit`, { stdio: 'pipe' });
-
-if (tsc.toString().includes('error')) {
-	console.error('Compilation failed, exiting...');
-	process.exit(1);
-}
+execSync(`tsc -p ${__dirname}/tsconfig.json --noEmit`, { stdio: 'inherit' });
 
 if (fs.existsSync(`${__dirname}/build`)) {
 	console.log('Clearing old build...');
