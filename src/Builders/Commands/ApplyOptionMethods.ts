@@ -6,7 +6,7 @@ import RoleOption from '../CommandOptions/RoleOption';
 import IntegerOption from '../CommandOptions/IntegerOption';
 import BooleanOption from '../CommandOptions/BooleanOption';
 import AttachmentOption from '../CommandOptions/AttachmentOption';
-import MentionableOption from '../CommandOptions/MetionableOption';
+import MentionableOption from '../CommandOptions/MentionableOption';
 
 declare type ClassObject<T> = new (...args: unknown[]) => T;
 
