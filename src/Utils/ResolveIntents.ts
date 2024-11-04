@@ -15,7 +15,7 @@ export default function ResolveIntents(intents: number | bigint | string[]): big
 	for (const intent of intents) {
 		const intentName = NormalizeEventName(intent);
 		if (intentName in Intents) {
-			result |= Intents[intentName];
+			result |= BigInt(Intents[intentName as keyof typeof Intents]);
 		} else {
 			const closestMatch = ClosestMatch(intentName, Object.keys(Intents));
 			throw new Error(`Invalid intent "${intent}", did you mean "${closestMatch}"?`);
@@ -24,7 +24,7 @@ export default function ResolveIntents(intents: number | bigint | string[]): big
 
 	// I really don't know why you would leave this out
 	// Includes users, guilds, channels, and roles 
-	result |= Intents.guilds;
+	result |= BigInt(Intents.guilds);
 
 	return result;
 }

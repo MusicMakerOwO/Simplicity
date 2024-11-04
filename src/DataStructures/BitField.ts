@@ -1,13 +1,18 @@
 export default class BitField {
-	public bits: bigint;
-	public flags: Record<string, bigint>;
+	public bits: number;
+	public flags: Record<string, number>;
 
 	public _ALL: boolean;
 	public _NONE: boolean;
 
-	constructor(bits: number | bigint, flags: Record<string, bigint>) { // record = object
-		this.bits = BigInt(bits);
+	constructor(bits: number, flags: Record<string, number>) { // record = object
+		this.bits = Number(bits);
 		this.flags = flags;
+
+		if (isNaN(this.bits)) throw new TypeError('Invalid bits - NaN is not a number');
+		if (this.bits < 0) throw new TypeError('Invalid bits - Negative numbers are not allowed');
+		if (this.bits > Number.MAX_SAFE_INTEGER) throw new TypeError('Invalid bits - Number exceeds MAX_SAFE_INTEGER and will cause precision loss and destroy your data');
+
 
 		// these are here only to please the TS compiler lol
 		this._ALL = false;
@@ -25,7 +30,7 @@ export default class BitField {
 				configurable: true
 			});
 		}
-		this._NONE = this.bits === BigInt(0);
+		this._NONE = this.bits === 0;
 		this._ALL = !this._NONE;
 	}
 
@@ -50,12 +55,12 @@ export default class BitField {
 		return this.bits.toString();
 	}
 
-	static deserialize(data: string | bigint, flags: Record<string, bigint>) {
-		return new BitField(BigInt(data), flags);
+	static deserialize(data: number, flags: Record<string, number>) {
+		return new BitField(data, flags);
 	}
 
-	static from(data: string | bigint, flags: Record<string, bigint>) {
-		return new BitField(BigInt(data), flags);
+	static from(data: number, flags: Record<string, number>) {
+		return new BitField(data, flags);
 	}
 
 }

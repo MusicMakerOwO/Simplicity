@@ -70,9 +70,9 @@ export default class User {
 		this.locale = data.locale;
 		this.verified = Boolean(data.verified);
 		this.email = data.email;
-		this.flags = new BitField(data.flags ?? 0, UserFlags);
+		this.flags = new BitField(data.flags ?? 0, UserFlags as Record<string, number>);
 		this.nitro_subscription = NitroSubscriptions[data.premium_type ?? 0];
-		this.public_flags = new BitField(data.public_flags ?? 0, UserFlags);
+		this.public_flags = new BitField(data.public_flags ?? 0, UserFlags as Record<string, number>);
 		this.avatar_decoration_data = data.avatar_decoration_data ?? null;
 
 		this.created_at = SnowflakeToDate(this.id);
