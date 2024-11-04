@@ -110,30 +110,26 @@
 //   - MESSAGE_POLL_VOTE_REMOVE
 
 // Have to use a Record<string, bigint> because TypeScript doesn't support BigInt enums >:(
-const Intents: Record<string, bigint> = {
-	guilds: 1n << 0n,
-	guildMembers: 1n << 1n,
-	guildModeration: 1n << 2n,
-	guildEmojisAndStickers: 1n << 3n,
-	guildIntegrations: 1n << 4n,
-	guildWebhooks: 1n << 5n,
-	guildInvites: 1n << 6n,
-	guildVoiceStates: 1n << 7n,
-	guildPresences: 1n << 8n,
-	guildMessages: 1n << 9n,
-	guildMessageReactions: 1n << 10n,
-	guildMessageTyping: 1n << 11n,
-	directMessages: 1n << 12n,
-	directMessageReactions: 1n << 13n,
-	directMessageTyping: 1n << 14n,
-	messageContent: 1n << 15n,
-	guildScheduledEvents: 1n << 16n,
-	autoModerationConfiguration: 1n << 20n,
-	autoModerationExecution: 1n << 21n,
-	guildMessagePolls: 1n << 24n,
-	directMessagePolls: 1n << 25n
+export default {
+	guilds: 1 << 0,
+	guildMembers: 1 << 1,
+	guildModeration: 1 << 2,
+	guildEmojisAndStickers: 1 << 3,
+	guildIntegrations: 1 << 4,
+	guildWebhooks: 1 << 5,
+	guildInvites: 1 << 6,
+	guildVoiceStates: 1 << 7,
+	guildPresences: 1 << 8,
+	guildMessages: 1 << 9,
+	guildMessageReactions: 1 << 10,
+	guildMessageTyping: 1 << 11,
+	directMessages: 1 << 12,
+	directMessageReactions: 1 << 13,
+	directMessageTyping: 1 << 14,
+	messageContent: 1 << 15,
+	guildScheduledEvents: 1 << 16,
+	autoModerationConfiguration: 1 << 20,
+	autoModerationExecution: 1 << 21,
+	guildMessagePolls: 1 << 24,
+	directMessagePolls: 1 << 25
 }
-
-export default Intents;
-
-module.exports = exports.default;
