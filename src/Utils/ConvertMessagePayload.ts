@@ -1,5 +1,13 @@
-import { MessagePayload } from '../Types/MessagePayloads';
+import Embed from '../Builders/Embed';
 import ActionRow from '../Builders/Components/ActionRow';
+
+interface MessagePayload {
+	content: string;
+	embeds?: Array<Embed>;
+	components?: Array<ActionRow<any>>;
+	hidden: boolean;
+	flags?: number;
+}
 
 export default function ConvertMessagePayload(data: any): MessagePayload {
 	if (!data) throw new Error('Invalid message payload, expected an object or string');
