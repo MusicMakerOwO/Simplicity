@@ -79,6 +79,10 @@ import ResolveEndpoint from './Utils/ResolveEndpoint';
 import ResolveIntents from './Utils/ResolveIntents';
 import SnowflakeToDate from './Utils/SnowflakeToDate';
 
+// Helpers
+import InteractionModal from './Helpers/InteractionModal';
+import InteractionOptions from './Helpers/InteractionOptions';
+
 export {
 	// Primary
 	Client,
@@ -159,5 +163,9 @@ export {
 	Range,
 	ResolveEndpoint,
 	ResolveIntents,
-	SnowflakeToDate
+	SnowflakeToDate,
+
+	// Helpers
+	InteractionModal,
+	InteractionOptions
 };
