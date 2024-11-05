@@ -70,6 +70,15 @@ import RoleOption from './Builders/CommandOptions/RoleOption';
 import StringOption from './Builders/CommandOptions/StringOption';
 import UserOption from './Builders/CommandOptions/UserOption';
 
+// Utils
+import ClosestMatch from './Utils/ClosestMatch';
+import ConvertMessagePayload from './Utils/ConvertMessagePayload';
+import Debounce from './Utils/Debounce';
+import Range from './Utils/Range';
+import ResolveEndpoint from './Utils/ResolveEndpoint';
+import ResolveIntents from './Utils/ResolveIntents';
+import SnowflakeToDate from './Utils/SnowflakeToDate';
+
 export {
 	// Primary
 	Client,
@@ -141,5 +150,14 @@ export {
 	NumberOption,
 	RoleOption,
 	StringOption,
-	UserOption
+	UserOption,
+
+	// Utils
+	ClosestMatch,
+	ConvertMessagePayload,
+	Debounce,
+	Range,
+	ResolveEndpoint,
+	ResolveIntents,
+	SnowflakeToDate
 };
