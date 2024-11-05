@@ -1,10 +1,39 @@
 const Module = require('module');
 const fs = require('fs');
 
+const RED = '\x1b[31m';
+const RESET = '\x1b[0m';
+
 const PrimaryPackage = require(`../package.json`);
 
 const resolutionTable = new Map<string, string>();
 const modificationTable = new Map<string, string>(); // originalPath -> Plugin that modified it
+
+// 1.0.3 -> [1, 0, 3]
+// 1.0.X -> [1, 0, -1]
+function ConvertSemVer(versions: string) {
+	const semver = versions.split('.').map((v) => (v.trim().toUpperCase() === 'X' ? -1 : parseInt(v)));
+	if (semver[2] === undefined) semver[2] = -1;
+	if (semver[1] === undefined) semver[1] = -1;
+	return semver;
+}
+
+// [1, 0, 3] == [1, 0, 3] -> true
+// [1, 0, 3] == [1, 0, -1] -> true
+// [1, 0, 3] == [1, 0, 4] -> false
+function CompareSemVer(version: number[], supportedVersions: number[][]) {
+	for (const supportedVersion of supportedVersions) {
+		let match = true;
+		for (let i = 0; i < version.length; i++) {
+			if (supportedVersion[i] !== -1 && supportedVersion[i] !== version[i]) {
+				match = false;
+				break;
+			}
+		}
+		if (match) return true;
+	}
+	return false;
+}
 
 interface PluginPackage {
 	name: string;
@@ -46,8 +75,6 @@ function RecursiveReadFolder(folder: string) {
 	return files;
 }
 
-const ConflictingPlugins: string[] = [];
-
 const plugins = fs.readdirSync(`${__dirname}/../Plugins`, { withFileTypes: true });
 for (const plugin of plugins) {
 	if (!plugin.isDirectory()) continue;
@@ -56,55 +83,67 @@ for (const plugin of plugins) {
 	try {
 		var pluginPackage = require(`${pluginPath}/package.json`) as PluginPackage;
 	} catch (e) {
-		console.error(`Failed to load "${plugin.name}" - Missing or malformed package.json file`);
+		console.error(`${RED}Failed to load "${plugin.name}" - Missing or malformed package.json file${RESET}`);
 		continue;
 	}
 
 	const error = VerifyPackageIntegrity(pluginPackage);
 	if (error) {
-		console.error(`Failed to load "${plugin.name}" - ${error}`);
+		console.error(`${RED}Failed to load "${pluginPackage.name}" - ${error}${RESET}`);
 		continue;
 	}
 
-	if (!pluginPackage.supported_versions.includes(PrimaryPackage.version)) {
-		console.error(`[${plugin.name}] Plugin "${pluginPackage.name}" is not supported by this version of Simplicity`);
-		console.error(`[${plugin.name}] Plugin will be allowed to load but may not function correctly`);
-		console.error(`[${plugin.name}] Simplicity version: ${PrimaryPackage.version}`);
-		console.error(`[${plugin.name}] Supported versions: ${pluginPackage.supported_versions.join(', ')}`);
+	const versions: number[][] = [];
+	for (const version of pluginPackage.supported_versions) {
+		if (version === 'X') continue;
+		if (!version.match(/^[0-9]+\.[0-9X]+(\.[0-9X]+)?$/)) {
+			console.error(`${RED}Failed to load "${pluginPackage.name}" - Invalid version in supported_versions: ${version}${RESET}`);
+			continue;
+		}
+		const semver = ConvertSemVer(version);
+		versions.push(semver);
 	}
 
-	const conflictingFiles: string[] = [];
-	let conflict = false;
+	const packageVersion = ConvertSemVer(PrimaryPackage.version);
+	if (!CompareSemVer(packageVersion, versions)) {
+		console.error(`${RED}[${pluginPackage.name}] Plugin "${pluginPackage.name}" is not supported by this version of Simplicity${RESET}`);
+		console.error(`${RED}[${pluginPackage.name}] Plugin will be allowed to load but may not function correctly${RESET}`);
+		console.error(`${RED}[${pluginPackage.name}] Simplicity version: ${PrimaryPackage.version}${RESET}`);
+		console.error(`${RED}[${pluginPackage.name}] Supported versions: ${pluginPackage.supported_versions.join(', ')}${RESET}`);
+	}
+
+	// list of files that the plugin is trying to override
+	// We will check this at the end to prevent conflicts
+	const overrideRequests: string[][] = [];
 
 	const pluginFiles = RecursiveReadFolder(pluginPath);
 	for (const file of pluginFiles) {
+		if (file.endsWith('package.json')) continue;
+		if (file.endsWith('PluginManager.js')) continue;
 		const relativePath = file.replace(`${__dirname}/../Plugins/${plugin.name}/`, '');
 		const originalPath = `${__dirname}/${relativePath}`;
 		try {
 			const originalFullPath = require.resolve(originalPath);
 			const pluginFullPath = require.resolve(file);
-			if (conflict) {
-				conflictingFiles.push(originalPath);
-				continue;
+
+			if (originalFullPath === pluginFullPath) continue;
+
+			if (modificationTable.has(originalPath)) {
+				console.error(`${RED}[PLUGIN] Conflict detected: "${pluginPackage.name}@${pluginPackage.version}" and "${modificationTable.get(originalPath)}"${RESET}`);
+				console.error(`${RED}[PLUGIN] File: ${relativePath}${RESET}`);
+				console.error(`${RED}[PLUGIN] Priority: ${modificationTable.get(originalPath)}${RESET}`);
+				break;
 			}
-			if (!resolutionTable.has(pluginFullPath)) {
-				resolutionTable.set(pluginFullPath, originalFullPath);
-				modificationTable.set(originalFullPath, plugin.name);
-			} else {
-				conflict = true;
-				const conflictingPlugin = modificationTable.get(originalFullPath) as string;
-				if (!ConflictingPlugins.includes(conflictingPlugin)) {
-					ConflictingPlugins.push(conflictingPlugin);
-				}
-				if (!ConflictingPlugins.includes(plugin.name)) {
-					ConflictingPlugins.push(plugin.name);
-				}
-				conflictingFiles.push(originalPath);
-				continue;
-			}
+
+			overrideRequests.push([originalPath, pluginFullPath]);
 		} catch (e) {
 			// ignore, file doesn't exist
 		}
+	}
+
+	for (const [originalPath, pluginFullPath] of overrideRequests) {
+		resolutionTable.set(originalPath, pluginFullPath);
+		modificationTable.set(originalPath, `${pluginPackage.name}@${pluginPackage.version}`);
 	}
 }
 
