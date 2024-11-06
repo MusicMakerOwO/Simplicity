@@ -13,19 +13,19 @@ export default {
 		client.guilds.set(data.id, data);
 
 		for (const channel of data.channels) {
-			client.channels.set(channel.id, addGuildID(channel, data.id));
+			client.channels.set(`${data.id}-${channel.id}`, addGuildID(channel, data.id));
 		}
 
 		for (const role of data.roles) {
-			client.roles.set(role.id, addGuildID(role, data.id));
+			client.roles.set(`${data.id}-${role.id}`, addGuildID(role, data.id));
 		}
 
 		for (const emoji of data.emojis) {
-			client.emojis.set(emoji.id, addGuildID(emoji, data.id));
+			client.emojis.set(`${data.id}-${emoji.id}`, addGuildID(emoji, data.id));
 		}
 
 		for (const sticker of data.stickers ?? []) {
-			client.stickers.set(sticker.id, addGuildID(sticker, data.id));
+			client.stickers.set(`${data.id}-${sticker.id}`, addGuildID(sticker, data.id));
 		}
 
 		const guild = new Guild(client, data);
