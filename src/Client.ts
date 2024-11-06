@@ -69,7 +69,7 @@ export default class Client extends Events {
 		this.user = null; // This is set in the WSClient after the READY event
 		this.connected_at = null; // This is set in the WSClient after the READY event
 		this.activity = null;
-		this.collectorLookup = new Map(); // <channelID::messageID, Collector>
+		this.collectorLookup = new Map(); // <channelID-messageID, Collector>
 		this.pressence = 'ONLINE';
 
 		options.cacheSize = Range(1, Number(options.cacheSize ?? 0), 100_000);
