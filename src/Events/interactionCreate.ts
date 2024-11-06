@@ -8,7 +8,7 @@ export default {
 	execute: function (client: Client, data: APIInteraction) {
 		const interaction = new Interaction(client, data);
 
-		const activeCollector = client.collectorLookup.get(`${interaction.channel_id}::${interaction.message?.id}`);
+		const activeCollector = client.collectorLookup.get(`${interaction.channel_id}-${interaction.message?.id}`);
 		if (activeCollector) {
 			activeCollector.handleInteraction(interaction);
 		} else {

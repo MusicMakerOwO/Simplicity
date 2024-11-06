@@ -11,7 +11,7 @@ export default class InteractionOptions {
 	#client: Client;
 	#guildID: string;
 
-	// <type::name, value>
+	// <type-name, value>
 	public hoistedOptions: { [key: string]: string | number | boolean | null };
 
 	constructor(client: Client, guildID: string, options: Array<APIInteractionOption>, resolved: APIResolvedData) {
@@ -23,7 +23,7 @@ export default class InteractionOptions {
 		}
 
 		for (const [id, member] of Object.entries(resolved.members ?? {})) {
-			client.members.set(`${guildID}::${id}`, member);
+			client.members.set(`${guildID}-${id}`, member);
 		}
 
 		for (const channel of Object.values(resolved.channels ?? {})) {
@@ -31,7 +31,7 @@ export default class InteractionOptions {
 		}
 
 		for (const role of Object.values(resolved.roles ?? {})) {
-			this.#client.roles.set(`${guildID}::${role.id}`, role);
+			this.#client.roles.set(`${guildID}-${role.id}`, role);
 		}
 
 		this.hoistedOptions = {};
@@ -42,7 +42,7 @@ export default class InteractionOptions {
 	#parseOptions(options: Array<APIInteractionOption>) {
 		for (const option of options) {
 			if ('value' in option) {
-				this.hoistedOptions[`${option.type}::${option.name}`] = option.value ?? null;
+				this.hoistedOptions[`${option.type}-${option.name}`] = option.value ?? null;
 			} else {
 				this.hoistedOptions[option.type] = option.name;
 			}
@@ -54,7 +54,7 @@ export default class InteractionOptions {
 	}
 
 	getOption(type: number, name?: string) {
-		const key = [type, name].filter(Boolean).join('::');
+		const key = [type, name].filter(Boolean).join('-');
 		return this.hoistedOptions[key] ?? null;
 	}
 
@@ -75,7 +75,7 @@ export default class InteractionOptions {
 	getMember(name: string) : Member | null {
 		const memberID = this.getOption(CommandOptionTypes.USER, name) as string;
 		if (!memberID) return null;
-		return this.#client.members.getSync(`${this.#guildID}::${memberID}`) ?? null;
+		return this.#client.members.getSync(`${this.#guildID}-${memberID}`) ?? null;
 	}
 
 	getChannel(name: string) : Channel | null {
@@ -87,7 +87,7 @@ export default class InteractionOptions {
 	getRole(name: string) : Role | null {
 		const roleID = this.getOption(CommandOptionTypes.ROLE, name) as string;
 		if (!roleID) return null;
-		return this.#client.roles.getSync(`${this.#guildID}::${roleID}`) ?? null;
+		return this.#client.roles.getSync(`${this.#guildID}-${roleID}`) ?? null;
 	}
 
 	getString(name: string) : string | null {
@@ -110,7 +110,7 @@ export default class InteractionOptions {
 		const ID = this.getOption(CommandOptionTypes.MENTIONABLE, name) as string;
 		if (!ID) return null;
 		if (this.#client.users.cache.has(ID)) return this.#client.users.getSync(ID) as User;
-		if (this.#client.roles.cache.has(`${this.#guildID}::${ID}`)) return this.#client.roles.getSync(`${this.#guildID}::${ID}`) as Role;
+		if (this.#client.roles.cache.has(`${this.#guildID}-${ID}`)) return this.#client.roles.getSync(`${this.#guildID}-${ID}`) as Role;
 		return null;
 	}
 }

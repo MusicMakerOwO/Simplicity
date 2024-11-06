@@ -18,7 +18,7 @@ export default class Collector extends EventEmitter {
 		this.channelID = channelID;
 		this.messageID = messageID;
 
-		this.#client.collectorLookup.set(`${channelID}::${messageID}`, this);
+		this.#client.collectorLookup.set(`${channelID}-${messageID}`, this);
 
 		this.resetTimeout();
 	}
@@ -34,7 +34,7 @@ export default class Collector extends EventEmitter {
 	destroy() {
 		if (this.#clearTimeout) clearTimeout(this.#clearTimeout);
 		this.removeAllListeners();
-		this.#client.collectorLookup.delete(`${this.channelID}::${this.messageID}`);
+		this.#client.collectorLookup.delete(`${this.channelID}-${this.messageID}`);
 	}
 
 	handleInteraction(interaction: Interaction) {
