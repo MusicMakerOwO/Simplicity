@@ -2,9 +2,9 @@ import Client from '../Client';
 import ClientCache from './ClientCache';
 import ResolveEndpoint from '../Utils/ResolveEndpoint';
 
-export default class SlidingCache<TIn extends { id: string }, TOut extends { id: string }> extends Map<string, TIn> {
+export default class SlidingCache<TIn extends { id: string }, TOut extends { id: string }> extends Map<string, TOut | undefined> {
 	#client: Client;
-	public readonly cacheLookup: string;
+	public readonly cache: ClientCache<TIn, TOut>;
 	public readonly guildID: string;
 	public readonly endpoint: string;
 	public readonly bulkEndpoint: string;
@@ -14,7 +14,7 @@ export default class SlidingCache<TIn extends { id: string }, TOut extends { id:
 	// new SlidingCache<APIRole, Role>(client, client.roles, guildID, Endpoints.GET_ROLE, RoleEndpoints.GET_ROLES, Role, endpointKey)
 	constructor(
 		client: Client,
-		cacheLookup: string,
+		cache: ClientCache<TIn, TOut>,
 		guildID: string,
 		endpoint: string,
 		bulkEndpoint: string,
@@ -23,19 +23,21 @@ export default class SlidingCache<TIn extends { id: string }, TOut extends { id:
 	) {
 		super();
 		this.#client = client;
-		this.cacheLookup = cacheLookup;
+		this.cache = cache;
 		this.guildID = guildID;
 		this.endpoint = endpoint;
 		this.bulkEndpoint = bulkEndpoint;
 		this.exportClass = exportClass;
 		this.endpointKey = endpointKey;
-	}
 
-	get #cache(): ClientCache<TIn, TOut> {
-		// @ts-ignore
-		const cache = this.#client[this.cacheLookup];
-		if (!cache || !(cache instanceof ClientCache)) throw new Error(`Invalid cache lookup : ${this.cacheLookup}`);
-		return cache;
+		const primaryCacheKeys = Array.from(this.cache.cache.keys());
+		for (let i = 0; i < primaryCacheKeys.length; i++) {
+			const key = primaryCacheKeys[i];
+			if (key.startsWith(this.guildID)) {
+				const [,id] = key.split('-');
+				this.set(id, this.cache.getSync(key));
+			}
+		}
 	}
 
 	#WrapInClass(data?: TIn): TOut | undefined {
@@ -44,32 +46,15 @@ export default class SlidingCache<TIn extends { id: string }, TOut extends { id:
 		return new this.exportClass(this.#client, data);
 	}
 
-	override set(id: string, data: TIn): this {
-		throw new Error('Cannot set data in this method, use the primary cache instead');
-	}
-
-	// @ts-ignore
-	override get(id: string): TOut | undefined {
-		return this.#cache.getSync(`${this.guildID}::${id}`);
-	}
-
-	async getAll(): Promise<TOut[]> {
-		const data = await this.#client.wsClient.SendRequest('GET', this.bulkEndpoint) as TIn[];
-		for (const role of data) {
-			this.set(role.id, role);
-		}
-		if (!data) return [];
-		if (!data.length) return [];
-		return data.map(this.#WrapInClass) as TOut[];
-	}
-
 	async fetch(id: string): Promise<TOut | undefined> {
-		if (!id) throw new Error('ID is required - If trying to fetch everything, use getAll()');
+		if (!id) throw new Error('ID is required - If trying to fetch everything');
 		const fullEndpoit = ResolveEndpoint(this.endpoint, { guild_id: this.guildID, [this.endpointKey]: id });
 		const data = await this.#client.wsClient.SendRequest('GET', fullEndpoit) as TIn;
+		this.cache.set(id, data);
 		
 		const output = this.#WrapInClass(data);
-		this.set(id, data);
+		if (!output) return undefined;
+		this.set(id, output);
 		return output;
 	}
 }
