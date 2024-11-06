@@ -2,6 +2,7 @@ import Client from '../Client';
 import LRUCache from './LRUCache';
 
 import ResolveEndpoint from '../Utils/ResolveEndpoint';
+import isClass from '../Utils/isClass';
 
 declare type ClassConstructor<T> = new (...args: any[]) => T;
 
@@ -13,9 +14,11 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 	public readonly endpoint: string;
 	public readonly cache: LRUCache<string, TIn>;
 	#name: string;
-	public fullWarning: boolean = false;
+	public fullWarning: boolean;
 
 	constructor(client: Client, maxSize: number, exportClass: ClassConstructor<TOut>, endpointKey: string, endpoint: string) {
+		if (!isClass(exportClass)) throw new Error('exportClass must be a class constructor, received: ' + typeof exportClass);
+		this.fullWarning = false;
 		this.#name = exportClass.name;
 		this.#client = client;
 		this.maxSize = maxSize;
@@ -64,11 +67,11 @@ export default class ClientCache<TIn extends Object, TOut extends Object> {
 		if (this.cache.size >= this.maxSize) this.WarnFullCache();
 	}
 
-	// guildID::itemID
+	// guildID-itemID
 	async fetch(key: string): Promise<TIn | undefined> {
 		if (!this.endpoint) return undefined;
 
-		let [ guildID, itemID ] = key.split('::');
+		let [ guildID, itemID ] = key.split('-');
 		if (!itemID) itemID = guildID;
 
 		const endpoint = ResolveEndpoint(this.endpoint, { 'guild': { id: guildID }, [this.endpointKey]: { id: itemID } });
