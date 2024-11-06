@@ -128,10 +128,10 @@ export default class Guild {
 		this.premium_progress_bar_enabled = data.premium_progress_bar_enabled;
 		this.safety_alerts_channel_id = data.safety_alerts_channel_id;
 
-		this.channels 	= new SlidingCache<APIChannel, Channel>	(client, 'channels',this.id, ChannelEndpoints.GET_CHANNEL, 	GuildEndpoints.GET_CHANNELS,	Channel,'channel');
-		this.roles 		= new SlidingCache<APIRole, Role>		(client, 'roles', 	this.id, RoleEndpoints.GET_ROLE, 		RoleEndpoints.GET_ROLES, 		Role, 	'role');
-		this.emojis 	= new SlidingCache<APIEmoji, Emoji>		(client, 'emojis', 	this.id, EmojiEndpoints.GET_EMOJI, 		EmojiEndpoints.GET_EMOJIS,		Emoji,	'emoji');
-		this.stickers 	= new SlidingCache<APISticker, Sticker>	(client, 'stickers',this.id, StickerEndpoints.GET_STICKER,	StickerEndpoints.GET_STICKERS,	Sticker,'sticker');
+		this.channels	= new SlidingCache<APIChannel,	Channel	>(client, client.channels,	this.id, ChannelEndpoints.GET_CHANNEL,	GuildEndpoints.GET_CHANNELS,	Channel,	'channel'	);
+		this.roles		= new SlidingCache<APIRole,		Role	>(client, client.roles,		this.id, RoleEndpoints.GET_ROLE,		RoleEndpoints.GET_ROLES,		Role,		'role'		);
+		this.emojis		= new SlidingCache<APIEmoji,	Emoji	>(client, client.emojis,	this.id, EmojiEndpoints.GET_EMOJI,		EmojiEndpoints.GET_EMOJIS,		Emoji,		'emoji'		);
+		this.stickers	= new SlidingCache<APISticker,	Sticker	>(client, client.stickers,	this.id, StickerEndpoints.GET_STICKER,	StickerEndpoints.GET_STICKERS,	Sticker,	'sticker'	);
 
 		this.created_at = SnowflakeToDate(this.id);
 	}
