@@ -100,7 +100,7 @@ export default class Channel {
 
 		this.currentlyTyping = false;
 
-		this.messages = new SlidingCache<APIMessage, Message>(client, 'messages', this.guildID as string, '', '', Message, ''); 
+		this.messages = new SlidingCache<APIMessage, Message>(client, client.messages, this.guildID as string, '', '', Message, ''); 
 		this.created_at = SnowflakeToDate(this.id);
 	}
 
