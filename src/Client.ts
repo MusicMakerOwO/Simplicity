@@ -41,7 +41,7 @@ export default class Client extends Events {
 	#token: string;
 	public wsClient: WSClient;
 	public vcClient: VCClient;
-	public intents: bigint;
+	public intents: number;
 	public connected_at: Date | null;
 	public id: string;
 
@@ -143,7 +143,7 @@ export default class Client extends Events {
 		this.user = null;
 		this.guilds.clear();
 		this.connected_at = null;
-		this.intents = 0n;
+		this.intents = 0;
 
 		this.emit('events', 'Client destroyed');
 		this.removeAllListeners();

@@ -126,7 +126,7 @@ export default class WSClient {
 					d: {
 						max_dave_protocol_version: 1,
 						token: `Bot ${this.#token}`,
-						intents: Number(this.#client.intents),
+						intents: this.#client.intents,
 						properties: {
 							os: process.platform,
 							device: 'Simplicity'
